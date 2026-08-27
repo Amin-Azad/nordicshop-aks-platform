@@ -1,23 +1,12 @@
-# Environment and secrets
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-
 # Python
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.ruff_cache/
 .venv/
-venv/
+.pytest_cache/
 
 # Node
 node_modules/
 dist/
-.vite/
-coverage/
 
 # Terraform
 .terraform/
@@ -26,12 +15,19 @@ coverage/
 *.tfplan
 crash.log
 
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
 # Editors and OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 
-# Local evidence and temporary files
+# Temporary files
+*.tmp
 *.log
-tmp/
