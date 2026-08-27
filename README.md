@@ -39,12 +39,15 @@ infra/
 helm/nordicshop/
 gitops/argocd/
 monitoring/
+tests/security/
 docs/
   adr/
   evidence/
   runbooks/
 .github/workflows/
 ```
+
+The root `tests/security/` directory is reserved for later platform-level security acceptance tests. The current application tests live under `application/tests/`.
 
 The empty platform folders are deliberate placeholders for later phases. Terraform, Kubernetes, Helm, Argo CD and monitoring have not been implemented yet.
 
