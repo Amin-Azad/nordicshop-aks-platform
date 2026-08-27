@@ -1,46 +1,19 @@
-# Test results
+# NordicShop Application Baseline v2 - Test Results
 
-## Automated baseline
+The application baseline was verified before being placed in the repository and was retested after the repository layout changes.
 
-Command:
+## Result
+
+`7 passed`
+
+The tests cover the current local development baseline, including API behavior, customer flow, vendor isolation and admin behavior.
+
+## Important scope note
+
+The active development runtime currently uses SQLite and an in-memory cart adapter. PostgreSQL Row-Level Security is included as the database policy for the later PostgreSQL environment but is not claimed as executed by the current SQLite test run. Redis is also introduced during the container-learning phase.
+
+Run the current repository tests from the repository root with:
 
 ```bash
-python -m pytest -q
+python -m pytest -q application/tests
 ```
-
-Result at packaging time:
-
-```text
-7 passed
-```
-
-Covered behavior:
-
-- API health and deterministic eight-product catalogue
-- Customer cart and demonstration checkout
-- Vendor A and Vendor B product-list tenant scoping
-- Vendor A denied when attempting to change a Vendor B product
-- Vendor denied from administrator routes
-- Administrator marketplace summary access
-- Missing demo identity rejected
-- Customer, Vendor and Admin entry pages returned successfully
-
-## Static checks
-
-- Python modules compile successfully.
-- Customer, Vendor and Admin JavaScript files pass syntax checks.
-- Required local assets are included in the package.
-
-## Honest pre-Docker limitation
-
-The initial baseline uses SQLite and an in-memory cart adapter so it runs before the Docker lesson. `database/postgresql_rls.sql` defines the intended PostgreSQL policies, but those policies are not reported as runtime-tested yet. PostgreSQL and Redis runtime verification belongs to the Docker Compose learning phase.
-
-## Manual review after download
-
-Run the application and review these pages:
-
-- `/shop/`
-- `/vendor/`
-- `/admin/`
-
-Then place an order, switch between both vendor identities and confirm each vendor sees only its own product and order-line data.
