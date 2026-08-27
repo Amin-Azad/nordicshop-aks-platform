@@ -2,11 +2,11 @@
 
 NordicShop is a small multi-tenant marketplace workload built for a learning-led Azure Kubernetes Service platform project.
 
-The application is intentionally limited so the main project can focus on Docker, Terraform, AKS, Kubernetes, Helm, identity, GitOps, observability and recovery.
+The repository separates the application workload from the platform implementation so each learning phase is easy to understand.
 
 ## Current application baseline
 
-The repository currently contains the tested local application baseline:
+The tested local application baseline lives under `application/`:
 
 - Customer Web: catalogue, cart and demonstration checkout
 - Vendor Portal: tenant-scoped products, stock updates and order lines
@@ -22,13 +22,16 @@ PostgreSQL and Redis are not yet the active local runtime dependencies. They are
 ## Repository structure
 
 ```text
-apps/
-  customer-web/
-  vendor-portal/
-  admin-portal/
-services/
-  nordic-api/
-database/
+application/
+  apps/
+    customer-web/
+    vendor-portal/
+    admin-portal/
+  services/
+    nordic-api/
+  database/
+  shared/
+  tests/
 infra/
   bootstrap/
   environments/dev/
@@ -36,7 +39,6 @@ infra/
 helm/nordicshop/
 gitops/argocd/
 monitoring/
-tests/security/
 docs/
   adr/
   evidence/
@@ -53,8 +55,8 @@ From the repository root:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r services/nordic-api/requirements.txt
-python -m uvicorn --app-dir services/nordic-api app.main:app --reload --port 8000
+python -m pip install -r application/services/nordic-api/requirements.txt
+python -m uvicorn --app-dir application/services/nordic-api app.main:app --reload --port 8000
 ```
 
 Open:
@@ -69,7 +71,7 @@ Demo identities are selected inside the Vendor and Admin interfaces. They are de
 ## Run tests
 
 ```bash
-python -m pytest -q
+python -m pytest -q application/tests
 ```
 
 The repository-layout version of the application was retested after moving the files into their planned folders: `7 passed`.
