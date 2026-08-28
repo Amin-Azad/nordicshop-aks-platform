@@ -19,6 +19,29 @@ The tested local application baseline lives under `application/`:
 
 PostgreSQL and Redis are not yet the active local runtime dependencies. They are introduced during the container-learning phase. The included PostgreSQL RLS SQL is therefore a planned database control, not something the current SQLite tests claim to execute.
 
+## Application architecture
+
+NordicShop has three frontend applications and one shared backend API. It is not split into business microservices.
+
+```text
+Customer Web ──┐
+Vendor Portal ─┼── HTTP /api/* ──> Nordic API
+Admin Portal ──┘                     │
+                                     ├── SQLite now → PostgreSQL later
+                                     └── In-memory cart now → Redis later
+```
+
+### Components
+
+- **Customer Web** provides product browsing, cart and demonstration checkout.
+- **Vendor Portal** uses the same API but only receives data for the signed-in vendor's `tenant_id`.
+- **Admin Portal** uses admin API routes for marketplace-wide demonstration data.
+- **Nordic API** contains the FastAPI routes, authorization checks, business logic and database access.
+- **SQLite** is the current local persistent database. PostgreSQL will replace it in the container environment.
+- **CartStore** currently keeps cart data in Python memory. Redis will replace it so cart state can be shared across API replicas.
+
+In the current local baseline, FastAPI also serves the three frontend folders as static files. During containerization the frontends will become separate containers and Nordic API will remain the shared backend service.
+
 ## Repository structure
 
 ```text
