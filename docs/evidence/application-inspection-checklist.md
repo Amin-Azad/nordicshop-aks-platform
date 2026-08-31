@@ -702,3 +702,7 @@ No custom app logging  → improve during operations phase
 **Application inspection: COMPLETE**
 
 The next phase is Docker fundamentals and containerization, starting from first principles rather than copying a prepared Dockerfile.
+
+## Status update: 
+
+This checklist records the application state before containerization. Since this inspection, the three frontends have been separated from FastAPI, four custom container images have been built and verified, and PostgreSQL and Redis official images have been tested separately. The current container state is recorded in docs/evidence/container-images.md.
