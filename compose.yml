@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_DB: nordicshop
+      POSTGRES_USER: nordicshop
+      POSTGRES_PASSWORD: nordicshop-dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - nordicshop-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nordicshop -d nordicshop"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:8.10.1-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    image: nordicshop-api:prod
+    environment:
+      NORDICSHOP_DATABASE_URL: postgresql+psycopg://nordicshop:nordicshop-dev@postgres:5432/nordicshop
+      NORDICSHOP_REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/ready')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  customer-web:
+    image: nordicshop-customer-web:prod
+    ports:
+      - "8081:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+  vendor-portal:
+    image: nordicshop-vendor-portal:prod
+    ports:
+      - "8082:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+  admin-portal:
+    image: nordicshop-admin-portal:prod
+    ports:
+      - "8083:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  nordicshop-postgres-data:

@@ -7,11 +7,17 @@ sys.path.insert(0, str(API_ROOT))
 
 TEST_DB = Path(__file__).parent / "nordicshop_test.db"
 TEST_DB.unlink(missing_ok=True)
+
 os.environ["NORDICSHOP_DATABASE_URL"] = f"sqlite:///{TEST_DB}"
+os.environ["NORDICSHOP_REDIS_URL"] = "redis://localhost:6379/15"
+
+from redis import Redis
+
+test_redis = Redis.from_url(os.environ["NORDICSHOP_REDIS_URL"])
+test_redis.flushdb()
 
 from fastapi.testclient import TestClient
 from app.main import app
-
 
 VENDOR_A = {"X-Demo-User": "1"}
 VENDOR_B = {"X-Demo-User": "2"}
