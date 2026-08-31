@@ -6,18 +6,18 @@ The repository separates the application workload from the platform implementati
 
 ## Current application baseline
 
-The tested local application baseline lives under `application/`:
+The application lives under `application/`:
 
 - Customer Web: catalogue, cart and demonstration checkout
 - Vendor Portal: tenant-scoped products, stock updates and order lines
 - Admin Portal: marketplace overview and vendor status control
 - Nordic API: Python FastAPI backend
 - SQLite development database with deterministic seed data
-- PostgreSQL Row-Level Security policy for the later PostgreSQL environment
-- In-memory development cart adapter, ready to be replaced by Redis during the Docker phase
+- PostgreSQL Row-Level Security policy prepared for the later PostgreSQL environment
+- In-memory development cart adapter, ready to be replaced by Redis
 - API, journey and tenant-isolation tests
 
-PostgreSQL and Redis are not yet the active local runtime dependencies. They are introduced during the container-learning phase. The included PostgreSQL RLS SQL is therefore a planned database control, not something the current SQLite tests claim to execute.
+PostgreSQL and Redis official images have now been tested separately, but they are not connected to Nordic API yet. That will happen in the Docker Compose phase.
 
 ## Application architecture
 
@@ -37,10 +37,25 @@ Admin Portal ──┘                     │
 - **Vendor Portal** uses the same API but only receives data for the signed-in vendor's `tenant_id`.
 - **Admin Portal** uses admin API routes for marketplace-wide demonstration data.
 - **Nordic API** contains the FastAPI routes, authorization checks, business logic and database access.
-- **SQLite** is the current local persistent database. PostgreSQL will replace it in the container environment.
-- **CartStore** currently keeps cart data in Python memory. Redis will replace it so cart state can be shared across API replicas.
+- **SQLite** is still the current development database.
+- **CartStore** still keeps cart data in Python memory.
 
-In the current local baseline, FastAPI also serves the three frontend folders as static files. During containerization the frontends will become separate containers and Nordic API will remain the shared backend service.
+The three frontends and Nordic API are now separate container images. Nordic API no longer serves the frontend folders itself.
+
+## Container images
+
+The current container phase has verified these images individually:
+
+- `nordicshop-api:prod`
+- `nordicshop-customer-web:prod`
+- `nordicshop-vendor-portal:prod`
+- `nordicshop-admin-portal:prod`
+- `postgres:18.6-alpine`
+- `redis:8.10.1-alpine`
+
+The custom images run as non-root users. PostgreSQL and Redis were also checked at runtime to confirm their actual server processes run as restricted users.
+
+A short record of the checks is in `docs/evidence/container-images.md`.
 
 ## Repository structure
 
@@ -74,7 +89,7 @@ The root `tests/security/` directory is reserved for later platform-level securi
 
 The empty platform folders are deliberate placeholders for later phases. Terraform, Kubernetes, Helm, Argo CD and monitoring have not been implemented yet.
 
-## Run locally
+## Run Nordic API locally
 
 From the repository root:
 
@@ -85,14 +100,14 @@ python -m pip install -r application/services/nordic-api/requirements.txt
 python -m uvicorn --app-dir application/services/nordic-api app.main:app --reload --port 8000
 ```
 
-Open:
+Useful endpoints:
 
-- Customer Web: http://127.0.0.1:8000/
-- Vendor Portal: http://127.0.0.1:8000/vendor/
-- Admin Portal: http://127.0.0.1:8000/admin/
-- API documentation: http://127.0.0.1:8000/docs
+- API root: `http://127.0.0.1:8000/`
+- Health: `http://127.0.0.1:8000/api/health`
+- Readiness: `http://127.0.0.1:8000/api/ready`
+- API documentation: `http://127.0.0.1:8000/docs`
 
-Demo identities are selected inside the Vendor and Admin interfaces. They are development identities only, not production authentication.
+The frontends are now separate from the API. Their full local integration will be added with Docker Compose rather than being served by FastAPI.
 
 ## Run tests
 
@@ -100,8 +115,8 @@ Demo identities are selected inside the Vendor and Admin interfaces. They are de
 python -m pytest -q application/tests
 ```
 
-The repository-layout version of the application was retested after moving the files into their planned folders: `7 passed`.
+Current result: `7 passed`.
 
 ## Current boundary
 
-There are no production Dockerfiles, final Docker Compose environment, Kubernetes manifests, Helm implementation, Terraform modules, GitHub deployment workflow or Argo CD configuration yet. Those will be created step by step during the platform learning work.
+Production Dockerfiles for the four custom application images are complete and individually verified. Docker Compose, Kubernetes, Helm, Terraform, GitHub deployment workflows and Argo CD are still future phases.

@@ -1,9 +1,6 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -13,9 +10,6 @@ from .cart import cart_store
 from .database import Base, SessionLocal, engine, get_db
 from .models import Order, OrderLine, Product, Tenant, User
 from .seed import seed_database
-
-
-ROOT = Path(__file__).resolve().parents[3]
 
 
 @asynccontextmanager
@@ -193,12 +187,6 @@ def admin_orders(_: User = Depends(admin_user), db: Session = Depends(get_db)):
              "created_at": o.created_at.isoformat(), "items": len(o.lines)} for o in orders]
 
 
-app.mount("/assets", StaticFiles(directory=ROOT / "shared"), name="assets")
-app.mount("/vendor", StaticFiles(directory=ROOT / "apps" / "vendor-portal", html=True), name="vendor")
-app.mount("/admin", StaticFiles(directory=ROOT / "apps" / "admin-portal", html=True), name="admin")
-app.mount("/shop", StaticFiles(directory=ROOT / "apps" / "customer-web", html=True), name="shop")
-
-
 @app.get("/", include_in_schema=False)
 def root():
-    return RedirectResponse("/shop/")
+    return {"service": "nordic-api"}

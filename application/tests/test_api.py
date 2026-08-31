@@ -66,8 +66,8 @@ def test_missing_identity_is_rejected():
         assert client.get("/api/vendor/products").status_code == 401
 
 
-def test_three_portal_entry_points_render():
+def test_api_root():
     with TestClient(app) as client:
-        assert "NordicShop" in client.get("/shop/").text
-        assert "Partner workspace" in client.get("/vendor/").text
-        assert "Admin overview" in client.get("/admin/").text
+        response = client.get("/")
+        assert response.status_code == 200
+        assert response.json() == {"service": "nordic-api"}
