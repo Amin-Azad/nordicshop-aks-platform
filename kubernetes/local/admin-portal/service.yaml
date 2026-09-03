@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-portal
+  namespace: nordicshop
+spec:
+  selector:
+    app: nordicshop-admin-portal
+  ports:
+    - port: 8080
+      targetPort: 8080

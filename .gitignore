@@ -32,3 +32,4 @@ Thumbs.db
 *.tmp
 *.log
 application/tests/*.db
+kubernetes/local/02-secret.yaml

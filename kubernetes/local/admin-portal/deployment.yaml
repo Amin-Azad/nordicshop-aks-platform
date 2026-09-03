@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nordicshop-admin-portal
+  namespace: nordicshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nordicshop-admin-portal
+  template:
+    metadata:
+      labels:
+        app: nordicshop-admin-portal
+    spec:
+      containers:
+        - name: nordicshop-admin-portal
+          image: nordicshop-admin-portal:prod
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080

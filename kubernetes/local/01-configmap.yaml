@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nordicshop-config
+  namespace: nordicshop
+data:
+  NORDICSHOP_REDIS_URL: redis://redis:6379/0
+  
