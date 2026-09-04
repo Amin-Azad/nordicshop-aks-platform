@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: nordicshop-portals
+  namespace: {{ .Release.Namespace }}
+
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+    - http:
+        paths:
+          - path: /vendor(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: vendor-portal
+                port:
+                  number: 8080
+
+          - path: /admin(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: admin-portal
+                port:
+                  number: 8080

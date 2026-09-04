@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nordicshop-api
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  replicas: {{ .Values.api.replicas }}
+
+  selector:
+    matchLabels:
+      app: nordicshop-api
+
+  template:
+    metadata:
+      labels:
+        app: nordicshop-api
+
+    spec:
+      containers:
+        - name: nordicshop-api
+          image: {{ .Values.api.image }}
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8000
+
+          env:
+            - name: NORDICSHOP_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: nordicshop-secret
+                  key: NORDICSHOP_DATABASE_URL
+
+            - name: NORDICSHOP_REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: nordicshop-config
+                  key: NORDICSHOP_REDIS_URL
+
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10

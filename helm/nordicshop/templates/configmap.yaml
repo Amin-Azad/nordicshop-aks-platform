@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nordicshop-config
+  namespace: {{ .Release.Namespace }}
+data:
+  NORDICSHOP_REDIS_URL: {{ .Values.config.redisUrl | quote }}

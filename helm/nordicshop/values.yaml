@@ -1,0 +1,29 @@
+config:
+  redisUrl: redis://redis:6379/0
+
+redis:
+  image: redis:8.10.1-alpine
+  replicas: 1
+
+postgres:
+  image: postgres:18.6-alpine
+  replicas: 1
+  database: nordicshop
+  user: nordicshop
+  storage: 1Gi
+
+api:
+  image: nordicshop-api:prod
+  replicas: 1
+
+customerWeb:
+  image: nordicshop-customer-web:prod
+  replicas: 1
+
+vendorPortal:
+  image: nordicshop-vendor-portal:prod
+  replicas: 1
+
+adminportal: 
+  image: nordicshop-admin-portal:prod
+  replicas: 1

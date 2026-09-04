@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nordicshop-customer-web
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  replicas: {{ .Values.customerWeb.replicas }}
+
+  selector:
+    matchLabels:
+      app: nordicshop-customer-web
+
+  template:
+    metadata:
+      labels:
+        app: nordicshop-customer-web
+
+    spec:
+      containers:
+        - name: nordicshop-customer-web
+          image: {{ .Values.customerWeb.image }}
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080

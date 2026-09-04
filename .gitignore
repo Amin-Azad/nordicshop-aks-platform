@@ -33,3 +33,5 @@ Thumbs.db
 *.log
 application/tests/*.db
 kubernetes/local/02-secret.yaml
+helm/nordicshop/values-local-secret.yaml
+
