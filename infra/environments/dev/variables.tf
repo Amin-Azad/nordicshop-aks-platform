@@ -28,3 +28,18 @@ variable "tags" {
   description = "Additional tags applied to NordicShop resources."
   default     = {}
 }
+
+variable "vnet_address_space" {
+  description = "Address space assigned to the NordicShop virtual network."
+  type        = list(string)
+}
+
+variable "aks_subnet_prefix" {
+  description = "CIDR range assigned to the AKS subnet."
+  type        = string
+}
+
+variable "private_endpoint_subnet_prefix" {
+  description = "CIDR range reserved for future Azure Private Endpoints."
+  type        = string
+}

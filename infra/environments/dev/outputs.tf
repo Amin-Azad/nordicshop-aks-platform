@@ -7,3 +7,23 @@ output "resource_group_name" {
   description = "Name of the NordicShop development Resource Group."
   value       = module.resource_group.name
 }
+
+output "vnet_id" {
+  description = "ID of the NordicShop virtual network."
+  value       = module.network.vnet_id
+}
+
+output "vnet_name" {
+  description = "Name of the NordicShop virtual network."
+  value       = module.network.vnet_name
+}
+
+output "aks_subnet_id" {
+  description = "ID of the subnet reserved for AKS."
+  value       = module.network.aks_subnet_id
+}
+
+output "private_endpoint_subnet_id" {
+  description = "ID of the subnet reserved for future Private Endpoints."
+  value       = module.network.private_endpoint_subnet_id
+}
