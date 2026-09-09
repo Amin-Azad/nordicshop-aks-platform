@@ -1,0 +1,222 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="NordicShop Terraform Dependency Graph" id="0">
+    <mxGraphModel dx="1544" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#000000;" value="NordicShop Terraform Module Dependency Graph" vertex="1">
+          <mxGeometry height="40" width="700" x="350" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="backend_zone" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=8;" value="EXISTING TERRAFORM BACKEND" vertex="1">
+          <mxGeometry height="120" width="1280" x="60" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="rg-tfstate-nordicshop-weu stnstf242817791 / tfstate / dev.terraform.tfstate" vertex="1">
+          <mxGeometry height="55" width="560" x="420" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="mods" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=8;" value="TERRAFORM MODULES" vertex="1">
+          <mxGeometry height="620" width="1280" x="60" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="rg" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="01  resource-group&amp;nbsp;" vertex="1">
+          <mxGeometry height="65" width="220" x="560" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="network" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="02  network" vertex="1">
+          <mxGeometry height="60" width="190" x="180" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="monitoring" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="03  monitoring" vertex="1">
+          <mxGeometry height="60" width="190" x="560" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="acr" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="04  acr" vertex="1">
+          <mxGeometry height="60" width="190" x="940" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="identities" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="05  identities" vertex="1">
+          <mxGeometry height="60" width="190" x="180" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="aks" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="06  aks" vertex="1">
+          <mxGeometry height="60" width="190" x="560" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="keyvault" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="08  key-vault" vertex="1">
+          <mxGeometry height="60" width="190" x="940" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="rbac" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="07  rbac" vertex="1">
+          <mxGeometry height="60" width="190" x="320" y="706" as="geometry" />
+        </mxCell>
+        <mxCell id="federation" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="09  federation" vertex="1">
+          <mxGeometry height="60" width="190" x="560" y="706" as="geometry" />
+        </mxCell>
+        <mxCell id="diagnostics" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="10  diagnostics" vertex="1">
+          <mxGeometry height="60" width="190" x="800" y="706" as="geometry" />
+        </mxCell>
+        <mxCell id="budget" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="11  budget" vertex="1">
+          <mxGeometry height="60" width="190" x="170" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" edge="1" parent="1" source="backend" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;dashed=1;" target="rg" value="remote state">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="270" />
+              <mxPoint x="600" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="rg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="network" value="RG name / location">
+          <mxGeometry relative="1" x="0.3258" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="670" y="370" />
+              <mxPoint x="275" y="370" />
+              <mxPoint x="275" y="405" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="rg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="monitoring" value="RG name / location">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="rg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="acr" value="RG name / location">
+          <mxGeometry relative="1" x="0.3253" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="670" y="370" />
+              <mxPoint x="1035" y="370" />
+              <mxPoint x="1035" y="405" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="rg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="identities" value="RG name / location">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="340" />
+              <mxPoint x="520" y="490" />
+              <mxPoint x="300" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="rg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="aks" value="RG name / location">
+          <mxGeometry relative="1" x="0.0847" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="800" y="340" />
+              <mxPoint x="800" y="565" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="rg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="keyvault" value="RG name / location">
+          <mxGeometry relative="1" x="0.3155" as="geometry">
+            <mxPoint x="1" as="offset" />
+            <Array as="points">
+              <mxPoint x="860" y="322.5" />
+              <mxPoint x="860" y="490" />
+              <mxPoint x="1035" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="rg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="budget" value="scope">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="140" y="320" />
+              <mxPoint x="140" y="820" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="network" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="aks" value="aks_subnet_id">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="275" y="510" />
+              <mxPoint x="610" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="monitoring" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="aks" value="workspace_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="identities" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="aks" value="identity config">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="acr" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="rbac" value="acr_id">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1170" y="435" />
+              <mxPoint x="1170" y="810" />
+              <mxPoint x="415" y="810" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="identities" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="rbac" value="principal IDs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="635" />
+              <mxPoint x="370" y="635" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="aks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="rbac" value="kubelet / cluster identity">
+          <mxGeometry relative="1" x="0.1765" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="655" y="650" />
+              <mxPoint x="460" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="aks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="federation" value="oidc_issuer_url">
+          <mxGeometry relative="1" x="0.5315" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="aks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="diagnostics" value="aks_id">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="655" y="650" />
+              <mxPoint x="860" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="keyvault" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="rbac" value="key_vault_id">
+          <mxGeometry relative="1" x="0.5048" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1035" y="595" />
+              <mxPoint x="1035" y="620" />
+              <mxPoint x="415" y="620" />
+              <mxPoint x="415" y="665" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="identities" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="federation" value="workload identity">
+          <mxGeometry relative="1" x="-0.4501" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="240" y="670" />
+              <mxPoint x="620" y="670" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="monitoring" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#000000;strokeWidth=1;" target="diagnostics" value="workspace_id">
+          <mxGeometry relative="1" x="-0.0998" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="730" y="520" />
+              <mxPoint x="900" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="outputs" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=8;" value="KEY OUTPUTS" vertex="1">
+          <mxGeometry height="165" width="1280" x="60" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="o1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="network → aks_subnet_id" vertex="1">
+          <mxGeometry height="50" width="220" x="110" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="o2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="monitoring → workspace_id" vertex="1">
+          <mxGeometry height="50" width="220" x="370" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="o3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="acr → acr_id" vertex="1">
+          <mxGeometry height="50" width="180" x="630" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="o4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="aks → oidc_issuer_url + kubelet identity" vertex="1">
+          <mxGeometry height="70" width="310" x="850" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="o5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=13;" value="identities → principal/client IDs" vertex="1">
+          <mxGeometry height="70" width="120" x="1190" y="940" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
