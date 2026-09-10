@@ -19,3 +19,13 @@ module "network" {
 
   tags = local.common_tags
 }
+
+module "monitoring" {
+  source = "../../modules/monitoring"
+
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  workspace_name      = "law-${local.name_prefix}-${var.location_short}"
+  retention_in_days   = 30
+  tags                = local.common_tags
+}

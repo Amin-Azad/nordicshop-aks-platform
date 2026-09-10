@@ -27,3 +27,14 @@ output "private_endpoint_subnet_id" {
   description = "ID of the subnet reserved for future Private Endpoints."
   value       = module.network.private_endpoint_subnet_id
 }
+
+output "log_analytics_workspace_id" {
+  description = "ID of the Log Analytics Workspace."
+  value       = module.monitoring.log_analytics_workspace_id
+}
+
+output "log_analytics_workspace_name" {
+  description = "Name of the Log Analytics Workspace."
+  value       = module.monitoring.log_analytics_workspace_name
+}
+
