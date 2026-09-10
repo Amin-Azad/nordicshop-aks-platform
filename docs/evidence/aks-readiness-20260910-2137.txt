@@ -1,0 +1,132 @@
+
+==================================================
+NORDICSHOP AKS READINESS - westeurope
+==================================================
+[1/6] Azure context
+Subscription          State    Tenant
+--------------------  -------  ------------------------------------
+Azure subscription 1  Enabled  ce02f814-9bb0-4eeb-a5e6-42af533c9e9f
+
+==================================================
+[2/6] Required resource providers
+==================================================
+Microsoft.ContainerService             NotRegistered
+Microsoft.Compute                      Registered
+Microsoft.Network                      Registered
+Microsoft.ContainerRegistry            Registered
+Microsoft.ManagedIdentity              Registered
+Microsoft.OperationalInsights          Registered
+Microsoft.Insights                     Registered
+Microsoft.KeyVault                     Registered
+
+==================================================
+[3/6] Existing NordicShop network
+==================================================
+{
+  "addressSpace": [
+    "10.20.0.0/16"
+  ],
+  "vnet": "vnet-nordicshop-dev"
+}
+[
+  {
+    "addressPrefixes": [
+      "10.20.0.0/22"
+    ],
+    "name": "snet-aks"
+  },
+  {
+    "addressPrefixes": [
+      "10.20.4.0/24"
+    ],
+    "name": "snet-private-endpoint"
+  }
+]
+
+==================================================
+[4/6] AKS Kubernetes versions
+==================================================
+KubernetesVersion    Upgrades                                                                                                                                                                                          SupportPlan
+-------------------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  --------------------------------------
+1.36.3               None available                                                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.36.2               1.36.3                                                                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.36.1               1.36.2, 1.36.3                                                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.36.0               1.36.1, 1.36.2, 1.36.3                                                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.7               1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.6               1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.5               1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.4               1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.3               1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.2               1.35.3, 1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.1               1.35.2, 1.35.3, 1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.0               1.35.1, 1.35.2, 1.35.3, 1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                            KubernetesOfficial, AKSLongTermSupport
+
+==================================================
+[5/6] Regional compute quota
+==================================================
+ERROR: The command failed with an unexpected error. Here is the traceback:
+ERROR: '>' not supported between instances of 'str' and 'int'
+Traceback (most recent call last):
+  File "/opt/az/lib/python3.13/site-packages/knack/cli.py", line 233, in invoke
+    cmd_result = self.invocation.execute(args)
+  File "/opt/az/lib/python3.13/site-packages/azure/cli/core/commands/__init__.py", line 694, in execute
+    self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/az/lib/python3.13/site-packages/knack/cli.py", line 170, in raise_event
+    func(self, **kwargs)
+    ~~~~^^^^^^^^^^^^^^^^
+  File "/opt/az/lib/python3.13/site-packages/knack/query.py", line 45, in filter_output
+    kwargs['event_data']['result'] = query_expression.search(
+                                     ~~~~~~~~~~~~~~~~~~~~~~~^
+        kwargs['event_data']['result'], Options(collections.OrderedDict))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/az/lib/python3.13/site-packages/jmespath/parser.py", line 509, in search
+    result = interpreter.visit(self.parsed, value)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 94, in visit
+    return method(node, *args, **kwargs)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 180, in visit_filter_projection
+    if self._is_true(self.visit(comparator_node, element)):
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 94, in visit
+    return method(node, *args, **kwargs)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 249, in visit_or_expression
+    matched = self.visit(node['children'][1], value)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 94, in visit
+    return method(node, *args, **kwargs)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 253, in visit_and_expression
+    matched = self.visit(node['children'][0], value)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 94, in visit
+    return method(node, *args, **kwargs)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 256, in visit_and_expression
+    return self.visit(node['children'][1], value)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 94, in visit
+    return method(node, *args, **kwargs)
+  File "/opt/az/lib/python3.13/site-packages/jmespath/visitor.py", line 158, in visit_comparator
+    return comparator_func(left, right)
+TypeError: '>' not supported between instances of 'str' and 'int'
+To check existing issues, please visit: https://github.com/Azure/azure-cli/issues
+
+==================================================
+[6/6] Small AKS node candidates
+==================================================
+Target: non-B-series, 4 vCPU, >= 8 GB RAM.
+Availability here does not guarantee family quota; compare with section 5.
+
+Name                         vCPU   RAM_GB  
+---------------------------- ------ --------
+
+==================================================
+CURRENT NORDICSHOP DESIGN TARGET
+==================================================
+Region:              westeurope
+VNet:                10.20.0.0/16
+AKS subnet:          10.20.0.0/22
+Reserved PE subnet:  10.20.4.0/24
+Pod CIDR:            10.244.0.0/16
+Service CIDR:        10.30.0.0/16
+DNS service IP:      10.30.0.10
+Kubernetes target:   1.36
+Node target:         one small system pool; exact SKU decided from availability + quota
+
+This script is read-only. Review its output before terraform plan/apply.
