@@ -40,3 +40,12 @@ module "acr" {
   tags                = local.common_tags
 }
 
+module "identities" {
+  source = "../../modules/identities"
+
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  identity_name       = "id-nordic-api-${var.environment}-${var.location_short}"
+  tags                = local.common_tags
+}
+

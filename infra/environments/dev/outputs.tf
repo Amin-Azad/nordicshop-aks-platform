@@ -52,3 +52,18 @@ output "acr_login_server" {
   description = "Login server of the Azure Container Registry."
   value       = module.acr.acr_login_server
 }
+
+output "nordic_api_identity_id" {
+  description = "Azure resource ID of the Nordic API managed identity"
+  value       = module.identities.identity_id
+}
+
+output "nordic_api_identity_client_id" {
+  description = "Client ID of the Nordic API managed identity"
+  value       = module.identities.client_id
+}
+
+output "nordic_api_identity_principal_id" {
+  description = "Principal ID of the Nordic API managed identity"
+  value       = module.identities.principal_id
+}
