@@ -49,3 +49,25 @@ module "identities" {
   tags                = local.common_tags
 }
 
+module "aks" {
+  source = "../../modules/aks"
+
+  aks_name            = "aks-${local.name_prefix}-${var.location_short}"
+  location            = var.location
+  resource_group_name = module.resource_group.name
+  dns_prefix          = local.name_prefix
+  kubernetes_version  = var.aks_kubernetes_version
+
+  system_node_vm_size = var.aks_system_node_vm_size
+  system_node_count   = var.aks_system_node_count
+
+  aks_subnet_id = module.network.aks_subnet_id
+
+  pod_cidr       = var.aks_pod_cidr
+  service_cidr   = var.aks_service_cidr
+  dns_service_ip = var.aks_dns_service_ip
+
+  log_analytics_workspace_id = module.monitoring.log_analytics_workspace_id
+
+  tags = local.common_tags
+}

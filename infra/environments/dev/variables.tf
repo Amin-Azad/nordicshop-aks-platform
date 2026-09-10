@@ -58,3 +58,38 @@ variable "acr_sku" {
     error_message = "acr_sku must be Basic, Standard, or Premium."
   }
 }
+
+variable "aks_kubernetes_version" {
+  description = "Kubernetes version used by the AKS cluster."
+  type        = string
+}
+
+variable "aks_system_node_vm_size" {
+  description = "Azure VM size used by the AKS system node pool."
+  type        = string
+}
+
+variable "aks_system_node_count" {
+  description = "Number of nodes in the AKS system node pool."
+  type        = number
+
+  validation {
+    condition     = var.aks_system_node_count >= 1
+    error_message = "The AKS system node pool must contain at least one node."
+  }
+}
+
+variable "aks_pod_cidr" {
+  description = "CIDR range used for AKS pods with Azure CNI Overlay."
+  type        = string
+}
+
+variable "aks_service_cidr" {
+  description = "CIDR range used for Kubernetes services inside AKS."
+  type        = string
+}
+
+variable "aks_dns_service_ip" {
+  description = "IP address used by Kubernetes DNS inside the AKS service CIDR."
+  type        = string
+}

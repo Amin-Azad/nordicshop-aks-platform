@@ -67,3 +67,33 @@ output "nordic_api_identity_principal_id" {
   description = "Principal ID of the Nordic API managed identity"
   value       = module.identities.principal_id
 }
+
+output "aks_id" {
+  description = "Resource ID of the AKS cluster."
+  value       = module.aks.aks_id
+}
+
+output "aks_name" {
+  description = "Name of the AKS cluster."
+  value       = module.aks.aks_name
+}
+
+output "aks_oidc_issuer_url" {
+  description = "OIDC issuer URL exposed by the AKS cluster."
+  value       = module.aks.oidc_issuer_url
+}
+
+output "aks_cluster_identity_principal_id" {
+  description = "Principal ID of the AKS cluster managed identity."
+  value       = module.aks.cluster_identity_principal_id
+}
+
+output "aks_kubelet_identity_object_id" {
+  description = "Object ID of the AKS kubelet managed identity."
+  value       = module.aks.kubelet_identity_object_id
+}
+
+output "aks_node_resource_group" {
+  description = "Name of the AKS-managed node resource group."
+  value       = module.aks.node_resource_group
+}

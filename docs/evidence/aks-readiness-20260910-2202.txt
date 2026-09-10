@@ -1,0 +1,231 @@
+
+==================================================
+NORDICSHOP AKS READINESS - westeurope
+==================================================
+[1/5] Azure context
+Subscription          State    Tenant
+--------------------  -------  ------------------------------------
+Azure subscription 1  Enabled  ce02f814-9bb0-4eeb-a5e6-42af533c9e9f
+
+==================================================
+[2/5] Required providers
+==================================================
+Microsoft.ContainerService             Registered
+Microsoft.Compute                      Registered
+Microsoft.Network                      Registered
+Microsoft.ContainerRegistry            Registered
+Microsoft.ManagedIdentity              Registered
+Microsoft.OperationalInsights          Registered
+Microsoft.Insights                     Registered
+Microsoft.KeyVault                     Registered
+
+==================================================
+[3/5] Existing NordicShop network
+==================================================
+{
+  "addressSpace": [
+    "10.20.0.0/16"
+  ],
+  "vnet": "vnet-nordicshop-dev"
+}
+[
+  {
+    "addressPrefixes": [
+      "10.20.0.0/22"
+    ],
+    "name": "snet-aks"
+  },
+  {
+    "addressPrefixes": [
+      "10.20.4.0/24"
+    ],
+    "name": "snet-private-endpoint"
+  }
+]
+
+==================================================
+[4/5] AKS versions + compute quota
+==================================================
+AKS versions currently offered in westeurope:
+KubernetesVersion    Upgrades                                                                                                                                                                                          SupportPlan
+-------------------  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  --------------------------------------
+1.36.3               None available                                                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.36.2               1.36.3                                                                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.36.1               1.36.2, 1.36.3                                                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.36.0               1.36.1, 1.36.2, 1.36.3                                                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.7               1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.6               1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.5               1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.4               1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.3               1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.2               1.35.3, 1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                            KubernetesOfficial, AKSLongTermSupport
+1.35.1               1.35.2, 1.35.3, 1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                                    KubernetesOfficial, AKSLongTermSupport
+1.35.0               1.35.1, 1.35.2, 1.35.3, 1.35.4, 1.35.5, 1.35.6, 1.35.7, 1.36.0, 1.36.1, 1.36.2, 1.36.3                                                                                                            KubernetesOfficial, AKSLongTermSupport
+
+Relevant compute quota:
+Quota                                     Used    Limit
+----------------------------------------  ------  -------
+Total Regional vCPUs                      0       10
+Standard D Family vCPUs                   0       10
+Standard Dv2 Family vCPUs                 0       10
+Standard Dv2 Promo Family vCPUs           0       10
+Standard Dadsv7 Family vCPUs              0       10
+Standard Daldsv7 Family vCPUs             0       10
+Standard Dalsv7 Family vCPUs              0       10
+Standard Dasv7 Family vCPUs               0       10
+Standard Ddsv6 Family vCPUs               0       10
+Standard Ddsv7 Family vCPUs               0       10
+Standard Dldsv6 Family vCPUs              0       10
+Standard Dldsv7 Family vCPUs              0       10
+Standard Dlsv6 Family vCPUs               0       10
+Standard Dlsv7 Family vCPUs               0       10
+Standard Dndv6 Family vCPUs               0       10
+Standard Dnldv6 Family vCPUs              0       10
+Standard Dnlv6 Family vCPUs               0       10
+Standard Dnv6 Family vCPUs                0       10
+Standard Dsv6 Family vCPUs                0       10
+Standard Dsv7 Family vCPUs                0       10
+Standard DADSv5 Family vCPUs              0       0
+standard Dadv6 Family vCPUs               0       10
+standard Daldv6 Family vCPUs              0       10
+standard Dalv6 Family vCPUs               0       10
+Standard DASv4 Family vCPUs               0       10
+Standard DASv5 Family vCPUs               0       0
+standard Dav6 Family vCPUs                0       10
+Standard DAv4 Family vCPUs                0       0
+Standard DDSv4 Family vCPUs               0       10
+Standard DDSv5 Family vCPUs               0       0
+Standard DDv4 Family vCPUs                0       10
+Standard DDv5 Family vCPUs                0       0
+Standard DLDSv5 Family vCPUs              0       0
+Standard DLSv5 Family vCPUs               0       0
+Standard DPDSv5 Family vCPUs              0       0
+Standard Dpdsv6 Family vCPUs              0       10
+Standard DPLDSv5 Family vCPUs             0       0
+Standard Dpldsv6 Family vCPUs             0       10
+Standard DPLSv5 Family vCPUs              0       0
+Standard Dplsv6 Family vCPUs              0       10
+Standard DPSv5 Family vCPUs               0       0
+Standard Dpsv6 Family vCPUs               0       10
+Standard DSv3 Family vCPUs                0       10
+Standard DSv4 Family vCPUs                0       10
+Standard DSv5 Family vCPUs                0       0
+Standard Dv3 Family vCPUs                 0       10
+Standard Dv4 Family vCPUs                 0       10
+Standard Dv5 Family vCPUs                 0       0
+Standard DCEDV6 Family vCPUs              0       10
+Standard DCEV6 Family vCPUs               0       10
+standard DCADCCV5 Family vCPUs            0       0
+Standard DCADSv5 Family vCPUs             0       0
+Standard DCadsv6 Family vCPUs             0       0
+standard DCACCV5 Family vCPUs             0       0
+Standard DCASv5 Family vCPUs              0       0
+Standard DCasv6 Family vCPUs              0       0
+Standard DDCSv3 Family vCPUs              0       0
+Standard DCEDV5 Family vCPUs              0       0
+Standard DCEV5 Family vCPUs               0       0
+Standard DCSv3 Family vCPUs               0       0
+Standard DCSv2 Family vCPUs               0       8
+Standard DCS Family vCPUs                 0       8
+Standard DS Family vCPUs                  0       10
+Standard DSv2 Family vCPUs                0       10
+Standard DSv2 Promo Family vCPUs          0       10
+Standard EIDSv5 Family vCPUs              0       0
+Standard EIDv5 Family vCPUs               0       0
+Standard EIADSv5 Family vCPUs             0       0
+Standard EIBDSv5 Family vCPUs             0       0
+Standard EADSv5 Family vCPUs              0       0
+Standard EDSv4 Family vCPUs               0       10
+Standard EDSv5 Family vCPUs               0       0
+Standard EBDSv5 Family vCPUs              0       10
+Standard EDv4 Family vCPUs                0       0
+Standard EDv5 Family vCPUs                0       0
+Standard EPDSv5 Family vCPUs              0       0
+Standard EIDSv4 Family vCPUs              0       0
+Standard ECEDV5 Family vCPUs              0       0
+standard ECADCCV5 Family vCPUs            0       0
+Standard ECADSv5 Family vCPUs             0       0
+Standard ECEDV6 Family vCPUs              0       10
+Standard ECIADSv5 Family vCPUs            0       0
+Standard F Family vCPUs                   0       10
+Standard Famdsv7 Family vCPUs             0       10
+Standard Famsv7 Family vCPUs              0       10
+Standard Fadsv7 Family vCPUs              0       10
+Standard Faldsv7 Family vCPUs             0       10
+Standard Falsv6 Family vCPUs              0       10
+Standard Falsv7 Family vCPUs              0       10
+Standard Famsv6 Family vCPUs              0       10
+Standard Fasv6 Family vCPUs               0       10
+Standard Fasv7 Family vCPUs               0       10
+Standard FS Family vCPUs                  0       10
+Standard FSv2 Family vCPUs                0       10
+Standard FXmdsv2 Family vCPUs             0       10
+Standard FXmsv2 Family vCPUs              0       10
+Standard FXMDVS Family vCPUs              0       0
+InternalNDM Sv 1 Family vCPUs             0       10
+Standard MBDSMediumMemoryv3 Family vCPUs  0       10
+Standard MDSMediumMemoryv2 Family vCPUs   0       0
+StandardMDS Medium Memoryv3 Family vCPUs  0       0
+Standard MIDSMediumMemoryv2 Family vCPUs  0       0
+StandardMDS High Memoryv3 Family vCPUs    0       0
+StandardMIDS High Memoryv3 Family vCPUs   0       0
+Standard NCADSA10v4 Family vCPUs          0       0
+Standard NCADS_A100_v4 Family vCPUs       0       0
+Standard NDISR GB300V6 Family vCPUs       0       0
+StandardNDISRGB200V6NDRFamily vCPUs       0       0
+Standard NDS Family vCPUs                 0       0
+Standard NDSv2 Family vCPUs               0       0
+Standard NDSv3 Family vCPUs               0       0
+Standard NDAMSv4_A100Family vCPUs         0       0
+Standard NDASv4_A100 Family vCPUs         0       0
+Standard NDSH100v5 Family vCPUs           0       0
+StandardNDISRH200V5Family vCPUs           0       0
+StandardNDI Sv 5MI300X Family vCPUs       0       0
+Standard NGADSV620v1 Family vCPUs         0       0
+Standard NVADSA10v5 Family vCPUs          0       0
+
+==================================================
+[5/5] Small 4-vCPU AKS node candidates
+==================================================
+Candidate D/F-family SKUs in westeurope:
+Name                       VCPU    RAM
+-------------------------  ------  ------
+Standard_D48ads_v5         48      192
+Standard_D48ads_v6         48      192
+Standard_D48ads_v7         48      192
+Standard_D48alds_v6        48      96
+Standard_D48alds_v7        48      96
+Standard_D48als_v6         48      96
+Standard_D48als_v7         48      96
+Standard_D48as_v4          48      192
+Standard_D48as_v5          48      192
+Standard_D48as_v6          48      192
+Standard_D48as_v7          48      192
+Standard_D48a_v4           48      192
+Standard_D48ds_v4          48      192
+Standard_D48ds_v5          48      192
+Standard_D48ds_v6          48      192
+Standard_D48d_v4           48      192
+Standard_D48d_v5           48      192
+Standard_D48lds_v5         48      96
+Standard_D48lds_v6         48      96
+Standard_D48ls_v5          48      96
+Standard_D48ls_v6          48      96
+Standard_D48pds_v6         48      192
+Standard_D48plds_v6        48      96
+
+==================================================
+CURRENT NORDICSHOP AKS DESIGN
+==================================================
+Region:              westeurope
+VNet:                10.20.0.0/16
+AKS subnet:          10.20.0.0/22
+Reserved PE subnet:  10.20.4.0/24
+Pod CIDR:            10.244.0.0/16
+Service CIDR:        10.30.0.0/16
+DNS service IP:      10.30.0.10
+Kubernetes target:   1.36
+Node target:         small non-B-series 4-vCPU system node SKU
+
+This script makes no Azure changes.
+Review this report before Terraform plan/apply.
