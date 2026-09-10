@@ -38,3 +38,17 @@ output "log_analytics_workspace_name" {
   value       = module.monitoring.log_analytics_workspace_name
 }
 
+output "acr_id" {
+  description = "ID of the Azure Container Registry."
+  value       = module.acr.acr_id
+}
+
+output "acr_name" {
+  description = "Name of the Azure Container Registry."
+  value       = module.acr.acr_name
+}
+
+output "acr_login_server" {
+  description = "Login server of the Azure Container Registry."
+  value       = module.acr.acr_login_server
+}

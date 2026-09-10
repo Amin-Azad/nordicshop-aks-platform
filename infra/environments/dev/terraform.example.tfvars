@@ -7,3 +7,6 @@ tags = {
   owner   = "platform"
   purpose = "nordicshop-aks-platform"
 }
+
+acr_name = "acrnordicshopazaddevweu"
+acr_sku  = "Basic"

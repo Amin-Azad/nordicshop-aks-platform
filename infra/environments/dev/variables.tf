@@ -43,3 +43,18 @@ variable "private_endpoint_subnet_prefix" {
   description = "CIDR range reserved for future Azure Private Endpoints."
   type        = string
 }
+
+variable "acr_name" {
+  description = "Globally unique name of the Azure Container Registry."
+  type        = string
+}
+
+variable "acr_sku" {
+  description = "SKU of the Azure Container Registry."
+  type        = string
+
+  validation {
+    condition     = contains(["Basic", "Standard", "Premium"], var.acr_sku)
+    error_message = "acr_sku must be Basic, Standard, or Premium."
+  }
+}

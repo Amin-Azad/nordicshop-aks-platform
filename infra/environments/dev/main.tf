@@ -29,3 +29,14 @@ module "monitoring" {
   retention_in_days   = 30
   tags                = local.common_tags
 }
+
+module "acr" {
+  source = "../../modules/acr"
+
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  acr_name            = var.acr_name
+  sku                 = var.acr_sku
+  tags                = local.common_tags
+}
+
