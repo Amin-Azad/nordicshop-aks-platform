@@ -93,3 +93,13 @@ variable "aks_dns_service_ip" {
   description = "IP address used by Kubernetes DNS inside the AKS service CIDR."
   type        = string
 }
+
+variable "budget_notification_emails" {
+  description = "Email addresses that receive Azure Cost Management budget notifications."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.budget_notification_emails) > 0
+    error_message = "At least one budget notification email address must be provided."
+  }
+}

@@ -152,3 +152,18 @@ module "diagnostics" {
     }
   }
 }
+
+module "budget" {
+  source = "../../modules/budget"
+
+  name              = "budget-${local.name_prefix}-${var.location_short}"
+  resource_group_id = module.resource_group.id
+
+  amount     = 3000
+  time_grain = "Monthly"
+
+  start_date = "2026-09-01T00:00:00Z"
+  end_date   = "2027-09-01T00:00:00Z"
+
+  notification_emails = var.budget_notification_emails
+}
