@@ -110,3 +110,45 @@ module "federation" {
     "api://AzureADTokenExchange"
   ]
 }
+
+module "diagnostics" {
+  source = "../../modules/diagnostics"
+
+  log_analytics_workspace_id = module.monitoring.log_analytics_workspace_id
+
+  diagnostic_settings = {
+    aks = {
+      name                           = "diag-aks-nordicshop-dev-weu"
+      target_resource_id             = module.aks.aks_id
+      log_analytics_destination_type = "Dedicated"
+
+      log_categories = [
+        "kube-apiserver",
+        "kube-audit-admin",
+        "kube-controller-manager",
+        "kube-scheduler",
+        "cluster-autoscaler"
+      ]
+    }
+
+    key_vault = {
+      name                           = "diag-kv-nordicshop-dev-weu"
+      target_resource_id             = module.key_vault.key_vault_id
+      log_analytics_destination_type = "Dedicated"
+
+      log_categories = [
+        "AuditEvent"
+      ]
+    }
+
+    acr = {
+      name               = "diag-acr-nordicshop-dev-weu"
+      target_resource_id = module.acr.acr_id
+
+      log_categories = [
+        "ContainerRegistryLoginEvents",
+        "ContainerRegistryRepositoryEvents"
+      ]
+    }
+  }
+}
