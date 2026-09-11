@@ -98,3 +98,15 @@ module "key_vault_secrets_rbac" {
   scope                = module.key_vault.key_vault_id
   role_definition_name = "Key Vault Secrets User"
 }
+
+module "federation" {
+  source = "../../modules/federation"
+
+  name                = "fic-nordic-api-dev"
+  managed_identity_id = module.identities.identity_id
+  issuer              = module.aks.oidc_issuer_url
+  subject             = "system:serviceaccount:nordicshop:nordic-api"
+  audiences = [
+    "api://AzureADTokenExchange"
+  ]
+}
