@@ -71,3 +71,11 @@ module "aks" {
 
   tags = local.common_tags
 }
+
+module "acr_pull_rbac" {
+  source = "../../modules/rbac"
+
+  principal_id         = module.aks.kubelet_identity_object_id
+  scope                = module.acr.acr_id
+  role_definition_name = "AcrPull"
+}
