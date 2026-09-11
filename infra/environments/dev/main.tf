@@ -79,3 +79,22 @@ module "acr_pull_rbac" {
   scope                = module.acr.acr_id
   role_definition_name = "AcrPull"
 }
+
+module "key_vault" {
+  source = "../../modules/key-vault"
+
+  name                = "kv-${local.name_prefix}-${var.location_short}"
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  sku_name            = "standard"
+  tags                = local.common_tags
+}
+
+module "key_vault_secrets_rbac" {
+  source = "../../modules/rbac"
+
+  principal_id         = module.identities.principal_id
+  scope                = module.key_vault.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+}

@@ -97,3 +97,13 @@ output "aks_node_resource_group" {
   description = "Name of the AKS-managed node resource group."
   value       = module.aks.node_resource_group
 }
+
+output "key_vault_name" {
+  description = "The name of the NordicShop Azure Key Vault."
+  value       = module.key_vault.key_vault_name
+}
+
+output "key_vault_uri" {
+  description = "The URI of the NordicShop Azure Key Vault."
+  value       = module.key_vault.key_vault_uri
+}
