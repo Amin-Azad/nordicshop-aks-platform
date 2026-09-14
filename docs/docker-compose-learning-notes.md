@@ -62,7 +62,7 @@ api:8000
 The API database connection therefore uses:
 
 ```text
-postgresql+psycopg://nordicshop:nordicshop-dev@postgres:5432/nordicshop
+postgresql+psycopg://nordicshop:<password>@postgres:5432/nordicshop
 ```
 
 and Redis uses:

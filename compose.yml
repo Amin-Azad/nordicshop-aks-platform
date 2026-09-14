@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: nordicshop
       POSTGRES_USER: nordicshop
-      POSTGRES_PASSWORD: nordicshop-dev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -28,7 +28,7 @@ services:
   api:
     image: nordicshop-api:prod
     environment:
-      NORDICSHOP_DATABASE_URL: postgresql+psycopg://nordicshop:nordicshop-dev@postgres:5432/nordicshop
+      NORDICSHOP_DATABASE_URL: ${NORDICSHOP_DATABASE_URL}
       NORDICSHOP_REDIS_URL: redis://redis:6379/0
     ports:
       - "8000:8000"

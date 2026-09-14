@@ -36,7 +36,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: nordicshop-secret
+                  name: nordicshop-runtime-secret
                   key: POSTGRES_PASSWORD
 
           volumeMounts:

@@ -4,7 +4,6 @@ resource "azurerm_kubernetes_cluster" "this" {
   resource_group_name = var.resource_group_name
   dns_prefix          = var.dns_prefix
   kubernetes_version  = var.kubernetes_version
-
   default_node_pool {
     name           = "system"
     vm_size        = var.system_node_vm_size
@@ -39,6 +38,15 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
+
+  web_app_routing {
+    dns_zone_ids             = []
+    default_nginx_controller = "AnnotationControlled"
+  }
+
+  key_vault_secrets_provider {
+    secret_rotation_enabled = true
+  }
 
   tags = var.tags
 }
