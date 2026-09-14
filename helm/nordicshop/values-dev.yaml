@@ -1,0 +1,11 @@
+api:
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-api:v1
+
+customerWeb:
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-customer-web:v2
+
+vendorPortal:
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-vendor-portal:v2
+
+adminportal:
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-admin-portal:v2

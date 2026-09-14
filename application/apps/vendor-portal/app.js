@@ -1,4 +1,4 @@
-let userId=localStorage.getItem('vendor-demo-user')||'1'; identity.value=userId;
+const userId='1';
 const headers=()=>({'X-Demo-User':userId}); const money=n=>`${Number(n).toLocaleString('da-DK')} DKK`;
 async function request(path,options={}){options.headers={...(options.headers||{}),...headers()};const r=await fetch(path,options);if(!r.ok)throw new Error((await r.json()).detail||'Request failed');return r.json();}
 async function loadMe(){const me=await request('/api/vendor/me');welcome.textContent=`Good morning, ${me.name.split(' ')[0]}`;tenantNote.textContent=me.tenant;}
@@ -6,5 +6,5 @@ async function showProducts(){setActive('products');const items=await request('/
 async function saveStock(id){const stock=Number(document.querySelector(`#stock-${id}`).value);await request(`/api/vendor/products/${id}/stock`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({stock})});message.className='notice';message.textContent='Stock updated.';}
 async function showOrders(){setActive('orders');const rows=await request('/api/vendor/orders');content.innerHTML=`<h2>Order lines</h2>${rows.length?`<table><thead><tr><th>Order</th><th>Product</th><th>Qty</th><th>Price</th><th>Status</th></tr></thead><tbody>${rows.map(x=>`<tr><td>#${x.order_id}</td><td>${x.product}</td><td>${x.quantity}</td><td>${money(x.unit_price)}</td><td><span class="status">${x.status}</span></td></tr>`).join('')}</tbody></table>`:'<div class="empty">No order lines for this vendor yet.</div>'}`;}
 function setActive(view){document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===view));}
-identity.onchange=async()=>{userId=identity.value;localStorage.setItem('vendor-demo-user',userId);message.textContent='';await loadMe();await showProducts();};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>b.dataset.view==='products'?showProducts():showOrders());
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>b.dataset.view==='products'?showProducts():showOrders());
 loadMe().then(showProducts).catch(e=>content.textContent=e.message);

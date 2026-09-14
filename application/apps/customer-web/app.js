@@ -1,4 +1,4 @@
-const cartId = localStorage.getItem('nordicshop-cart') || crypto.randomUUID();
+const cartId = localStorage.getItem('nordicshop-cart') || (crypto.randomUUID?.() ?? `cart-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 localStorage.setItem('nordicshop-cart', cartId);
 let products = [], category = 'All';
 const money = n => `${Number(n).toLocaleString('da-DK')} DKK`;

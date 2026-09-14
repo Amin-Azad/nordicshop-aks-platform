@@ -1,0 +1,76 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+
+metadata:
+  name: nordicshop-routes
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  parentRefs:
+    - name: nordicshop-gateway
+
+  rules:
+    # Redirect /vendor -> /vendor/
+    - matches:
+        - path:
+            type: Exact
+            value: /vendor
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /vendor/
+            statusCode: 308
+
+    # Route /vendor/... to Vendor Portal
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /vendor/
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: vendor-portal
+          port: 8080
+
+    # Redirect /admin -> /admin/
+    - matches:
+        - path:
+            type: Exact
+            value: /admin
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /admin/
+            statusCode: 308
+
+    # Route /admin/... to Admin Portal
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /admin/
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: admin-portal
+          port: 8080
+
+    # Customer storefront
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: customer-web
+          port: 8080
