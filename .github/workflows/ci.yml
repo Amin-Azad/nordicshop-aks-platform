@@ -1,0 +1,109 @@
+name: CI Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  application-validation:
+    name: Test and build application
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:8.10.1-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install API requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r application/services/nordic-api/requirements.txt
+
+      - name: Run API tests
+        run: python -m pytest -q application/tests
+
+      - name: Build Nordic API image
+        run: |
+          docker build \
+            -t nordicshop-api:ci-test \
+            application/services/nordic-api
+
+      - name: Build customer web image
+        run: |
+          docker build \
+            -f application/apps/customer-web/Dockerfile \
+            -t nordicshop-customer-web:ci-test \
+            application
+
+      - name: Build vendor portal image
+        run: |
+          docker build \
+            -f application/apps/vendor-portal/Dockerfile \
+            -t nordicshop-vendor-portal:ci-test \
+            application
+
+      - name: Build admin portal image
+        run: |
+          docker build \
+            -f application/apps/admin-portal/Dockerfile \
+            -t nordicshop-admin-portal:ci-test \
+            application
+  platform-validation:
+    name: Validate Helm and Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+
+      - name: Helm lint
+        run: |
+          helm lint helm/nordicshop \
+            -f helm/nordicshop/values-dev.yaml
+
+      - name: Render Helm templates
+        run: |
+          helm template nordicshop helm/nordicshop \
+            --namespace nordicshop \
+            -f helm/nordicshop/values-dev.yaml \
+            > /tmp/nordicshop-rendered.yaml
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive infra
+
+      - name: Initialize Terraform without backend
+        working-directory: infra/environments/dev
+        run: terraform init -backend=false
+
+      - name: Validate Terraform
+        working-directory: infra/environments/dev
+        run: terraform validate
+        
