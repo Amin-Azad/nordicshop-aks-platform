@@ -1,0 +1,39 @@
+name: Azure OIDC Login Test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AZURE_CLIENT_ID: 78dfb27f-8d9c-4b25-9343-7ea5a8822bc8
+  AZURE_TENANT_ID: ce02f814-9bb0-4eeb-a5e6-42af533c9e9f
+  AZURE_SUBSCRIPTION_ID: d3da25e5-680e-459c-99cf-0c4be70f4aad
+
+jobs:
+  oidc-login:
+    name: Verify Azure OIDC login
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify Azure identity
+        run: |
+          az account show \
+            --query "{subscription:name,subscriptionId:id,tenantId:tenantId}" \
+            -o table
+            

@@ -107,3 +107,10 @@ output "key_vault_uri" {
   description = "The URI of the NordicShop Azure Key Vault."
   value       = module.key_vault.key_vault_uri
 }
+
+output "github_actions_identity_client_id" {
+  description = "Client ID of the managed identity used by GitHub Actions OIDC."
+  value       = module.github_actions_identity.client_id
+}
+
+

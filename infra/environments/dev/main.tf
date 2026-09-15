@@ -49,6 +49,18 @@ module "identities" {
   tags                = local.common_tags
 }
 
+module "github_actions_identity" {
+  source = "../../modules/identities"
+
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  identity_name       = "id-github-actions-${var.environment}-${var.location_short}"
+
+  tags = merge(local.common_tags, {
+    purpose = "github-actions"
+  })
+}
+
 module "aks" {
   source = "../../modules/aks"
 
@@ -80,6 +92,14 @@ module "acr_pull_rbac" {
   role_definition_name = "AcrPull"
 }
 
+module "github_actions_acr_push_rbac" {
+  source = "../../modules/rbac"
+
+  principal_id         = module.github_actions_identity.principal_id
+  scope                = module.acr.acr_id
+  role_definition_name = "AcrPush"
+}
+
 module "key_vault" {
   source = "../../modules/key-vault"
 
@@ -106,6 +126,21 @@ module "federation" {
   managed_identity_id = module.identities.identity_id
   issuer              = module.aks.oidc_issuer_url
   subject             = "system:serviceaccount:nordicshop:nordic-api"
+  audiences = [
+    "api://AzureADTokenExchange"
+  ]
+}
+
+module "github_actions_federation" {
+  source = "../../modules/federation"
+
+  name                = "fic-github-main"
+  managed_identity_id = module.github_actions_identity.identity_id
+
+  issuer = "https://token.actions.githubusercontent.com"
+
+  subject = "repo:Amin-Azad@41924091/nordicshop-aks-platform@1348846402:ref:refs/heads/main"
+
   audiences = [
     "api://AzureADTokenExchange"
   ]
