@@ -1,0 +1,123 @@
+name: Publish Images to ACR
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AZURE_CLIENT_ID: 78dfb27f-8d9c-4b25-9343-7ea5a8822bc8
+  AZURE_TENANT_ID: ce02f814-9bb0-4eeb-a5e6-42af533c9e9f
+  AZURE_SUBSCRIPTION_ID: d3da25e5-680e-459c-99cf-0c4be70f4aad
+
+  ACR_NAME: acrnordicshopazaddevweu
+  ACR_LOGIN_SERVER: acrnordicshopazaddevweu.azurecr.io
+
+jobs:
+  publish-images:
+    name: Build and publish NordicShop images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name "$ACR_NAME"
+
+      - name: Build Nordic API image
+        run: |
+          docker build \
+            -t "$ACR_LOGIN_SERVER/nordicshop-api:$GITHUB_SHA" \
+            application/services/nordic-api
+
+      - name: Build customer web image
+        run: |
+          docker build \
+            -f application/apps/customer-web/Dockerfile \
+            -t "$ACR_LOGIN_SERVER/nordicshop-customer-web:$GITHUB_SHA" \
+            application
+
+      - name: Build vendor portal image
+        run: |
+          docker build \
+            -f application/apps/vendor-portal/Dockerfile \
+            -t "$ACR_LOGIN_SERVER/nordicshop-vendor-portal:$GITHUB_SHA" \
+            application
+
+      - name: Build admin portal image
+        run: |
+          docker build \
+            -f application/apps/admin-portal/Dockerfile \
+            -t "$ACR_LOGIN_SERVER/nordicshop-admin-portal:$GITHUB_SHA" \
+            application
+
+      - name: Push images to ACR
+        run: |
+          docker push "$ACR_LOGIN_SERVER/nordicshop-api:$GITHUB_SHA"
+          docker push "$ACR_LOGIN_SERVER/nordicshop-customer-web:$GITHUB_SHA"
+          docker push "$ACR_LOGIN_SERVER/nordicshop-vendor-portal:$GITHUB_SHA"
+          docker push "$ACR_LOGIN_SERVER/nordicshop-admin-portal:$GITHUB_SHA"
+
+      - name: Capture immutable image digests
+        run: |
+          API_DIGEST=$(az acr repository show \
+            --name "$ACR_NAME" \
+            --image "nordicshop-api:$GITHUB_SHA" \
+            --query digest \
+            -o tsv)
+
+          CUSTOMER_DIGEST=$(az acr repository show \
+            --name "$ACR_NAME" \
+            --image "nordicshop-customer-web:$GITHUB_SHA" \
+            --query digest \
+            -o tsv)
+
+          VENDOR_DIGEST=$(az acr repository show \
+            --name "$ACR_NAME" \
+            --image "nordicshop-vendor-portal:$GITHUB_SHA" \
+            --query digest \
+            -o tsv)
+
+          ADMIN_DIGEST=$(az acr repository show \
+            --name "$ACR_NAME" \
+            --image "nordicshop-admin-portal:$GITHUB_SHA" \
+            --query digest \
+            -o tsv)
+
+          {
+            echo "Git commit: $GITHUB_SHA"
+            echo
+            echo "$ACR_LOGIN_SERVER/nordicshop-api@$API_DIGEST"
+            echo "$ACR_LOGIN_SERVER/nordicshop-customer-web@$CUSTOMER_DIGEST"
+            echo "$ACR_LOGIN_SERVER/nordicshop-vendor-portal@$VENDOR_DIGEST"
+            echo "$ACR_LOGIN_SERVER/nordicshop-admin-portal@$ADMIN_DIGEST"
+          } | tee image-digests.txt
+
+      - name: Add image digests to workflow summary
+        run: |
+          {
+            echo "## Published NordicShop Images"
+            echo
+            echo '```text'
+            cat image-digests.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload digest evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: nordicshop-image-digests-${{ github.sha }}
+          path: image-digests.txt
+          retention-days: 30
+
+          
