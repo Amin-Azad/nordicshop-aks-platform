@@ -1,0 +1,30 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nordicshop-frontends-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - nordicshop-customer-web
+          - nordicshop-vendor-portal
+          - nordicshop-admin-portal
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-class-name: approuting-istio
+              gateway.networking.k8s.io/gateway-name: nordicshop-gateway
+      ports:
+        - protocol: TCP
+          port: 8080
+{{- end }}
+

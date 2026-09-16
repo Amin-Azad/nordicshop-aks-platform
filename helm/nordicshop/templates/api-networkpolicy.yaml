@@ -1,0 +1,29 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nordicshop-api-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: nordicshop-api
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: nordicshop-customer-web
+        - podSelector:
+            matchLabels:
+              app: nordicshop-vendor-portal
+        - podSelector:
+            matchLabels:
+              app: nordicshop-admin-portal
+      ports:
+        - protocol: TCP
+          port: 8000
+{{- end }}

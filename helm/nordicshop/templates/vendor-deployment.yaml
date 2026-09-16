@@ -17,5 +17,23 @@ spec:
         - name: nordicshop-vendor-portal
           image: {{ .Values.vendorPortal.image }}
           imagePullPolicy: IfNotPresent
+
+          resources:
+            {{ toYaml .Values.vendorPortal.resources | nindent 12 }}
+
           ports:
             - containerPort: 8080
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
