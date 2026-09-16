@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: nordicshop-api
   namespace: {{ .Release.Namespace }}
+  annotations:
+    gitops.nordicshop/test: "auto-sync-v1"
 
 spec:
   replicas: {{ .Values.api.replicas }}
