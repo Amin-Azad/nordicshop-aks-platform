@@ -6,10 +6,9 @@ metadata:
   namespace: kube-system
 
 data:
-  schema-version: v1
+  schema-version: v2
   config-version: ver1
 
   cluster-metrics: |-
     pod-annotation-based-scraping: |-
       podannotationnamespaceregex = "nordicshop"
-      
