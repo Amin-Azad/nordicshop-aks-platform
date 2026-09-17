@@ -84,6 +84,20 @@ module "aks" {
   tags = local.common_tags
 }
 
+module "container_insights" {
+  source = "../../modules/container-insights"
+
+  name = "MSCI-${local.name_prefix}-${var.location_short}"
+
+  resource_group_name = module.resource_group.name
+  location            = var.location
+
+  aks_id                     = module.aks.aks_id
+  log_analytics_workspace_id = module.monitoring.log_analytics_workspace_id
+
+  tags = local.common_tags
+}
+
 module "acr_pull_rbac" {
   source = "../../modules/rbac"
 
