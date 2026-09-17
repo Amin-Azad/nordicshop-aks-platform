@@ -17,6 +17,12 @@ spec:
         app: nordicshop-api
         azure.workload.identity/use: "true"
 
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+        prometheus.io/scheme: "http"
+
     spec:
       serviceAccountName: nordic-api
 
