@@ -1,13 +1,15 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Response
 from pydantic import BaseModel, EmailStr, Field
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .auth import admin_user, vendor_user
 from .cart import cart_store
 from .database import Base, SessionLocal, engine, get_db
+from .metrics import metrics_middleware
 from .models import Order, OrderLine, Product, Tenant, User
 from .seed import seed_database
 
@@ -21,8 +23,15 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="NordicShop API", version="0.1.0", lifespan=lifespan)
+app.middleware("http")(metrics_middleware)
 
-
+@app.get("/metrics", include_in_schema=False)
+def metrics():
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST,
+    )
+    
 class CartItemIn(BaseModel):
     cart_id: str = Field(min_length=3, max_length=80)
     product_id: int

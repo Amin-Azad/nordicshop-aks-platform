@@ -77,3 +77,46 @@ def test_api_root():
         response = client.get("/")
         assert response.status_code == 200
         assert response.json() == {"service": "nordic-api"}
+
+def test_metrics_endpoint_exposes_http_metrics():
+    with TestClient(app) as client:
+        response = client.get("/api/products")
+
+        assert response.status_code == 200
+
+        metrics = client.get("/metrics")
+
+        assert metrics.status_code == 200
+        assert "http_requests_total" in metrics.text
+        assert "http_request_duration_seconds" in metrics.text
+
+
+def test_metrics_use_normalized_routes():
+    with TestClient(app) as client:
+        response = client.get("/api/products/1")
+
+        assert response.status_code == 200
+
+        metrics = client.get("/metrics")
+
+        assert (
+            'http_requests_total{method="GET",route="/api/products/{product_id}",status="200"}'
+            in metrics.text
+        )
+
+        assert 'route="/api/products/1"' not in metrics.text
+
+
+def test_metrics_record_error_status_with_normalized_route():
+    with TestClient(app) as client:
+        response = client.get("/api/products/999999")
+
+        assert response.status_code == 404
+
+        metrics = client.get("/metrics")
+
+        assert (
+            'http_requests_total{method="GET",route="/api/products/{product_id}",status="404"}'
+            in metrics.text
+        )
+        
