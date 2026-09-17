@@ -98,6 +98,27 @@ module "container_insights" {
   tags = local.common_tags
 }
 
+module "managed_prometheus" {
+  source = "../../modules/managed-prometheus"
+
+  workspace_name      = "amw-${local.name_prefix}-${var.location_short}"
+  dcr_name            = "MSProm-${local.name_prefix}-${var.location_short}"
+  resource_group_name = module.resource_group.name
+  location            = var.location
+
+  aks_id = module.aks.aks_id
+
+  tags = local.common_tags
+}
+
+module "prometheus_query_rbac" {
+  source = "../../modules/rbac"
+
+  principal_id         = data.azurerm_client_config.current.object_id
+  scope                = module.managed_prometheus.monitor_workspace_id
+  role_definition_name = "Monitoring Data Reader"
+}
+
 module "acr_pull_rbac" {
   source = "../../modules/rbac"
 

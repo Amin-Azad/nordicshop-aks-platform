@@ -38,6 +38,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     log_analytics_workspace_id      = var.log_analytics_workspace_id
     msi_auth_for_monitoring_enabled = true
   }
+  monitor_metrics {}
 
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
