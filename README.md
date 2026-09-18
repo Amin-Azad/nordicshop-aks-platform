@@ -1,122 +1,496 @@
 # NordicShop AKS Platform
 
-NordicShop is a small multi-tenant marketplace workload built for a learning-led Azure Kubernetes Service platform project.
+NordicShop is a small multi-tenant marketplace that I use to build and test an Azure Kubernetes platform end to end.
 
-The repository separates the application workload from the platform implementation so each learning phase is easy to understand.
+The application is intentionally simple. The main work in this repository is the platform around it: Terraform, AKS, Helm, GitHub Actions, Argo CD, Workload Identity, Key Vault, monitoring, tenant isolation and recovery testing.
 
-## Current application baseline
+The current development environment runs on Azure AKS in West Europe. Infrastructure is managed with Terraform, application workloads are packaged with Helm, and Argo CD keeps the cluster aligned with the desired state in Git.
 
-The application lives under `application/`:
+## Architecture
 
-- Customer Web: catalogue, cart and demonstration checkout
-- Vendor Portal: tenant-scoped products, stock updates and order lines
-- Admin Portal: marketplace overview and vendor status control
-- Nordic API: Python FastAPI backend
-- SQLite development database with deterministic seed data
-- PostgreSQL Row-Level Security policy prepared for the later PostgreSQL environment
-- In-memory development cart adapter, ready to be replaced by Redis
-- API, journey and tenant-isolation tests
+![NordicShop platform architecture](docs/architecture/diagrams/01-full-platform-architecture.png)
 
-PostgreSQL and Redis official images have now been tested separately, but they are not connected to Nordic API yet. That will happen in the Docker Compose phase.
-
-## Application architecture
-
-NordicShop has three frontend applications and one shared backend API. It is not split into business microservices.
+The main request path is:
 
 ```text
-Customer Web ──┐
-Vendor Portal ─┼── HTTP /api/* ──> Nordic API
-Admin Portal ──┘                     │
-                                     ├── SQLite now → PostgreSQL later
-                                     └── In-memory cart now → Redis later
+Internet
+   |
+Azure Load Balancer / public entry point
+   |
+AKS Gateway / routing
+   |
+   +----------------+----------------+----------------+
+   |                |                |
+Customer Web    Vendor Portal    Admin Portal
+   \                |                /
+    \               |               /
+             Nordic API
+              /      \
+             /        \
+      PostgreSQL     Redis
 ```
 
-### Components
-
-- **Customer Web** provides product browsing, cart and demonstration checkout.
-- **Vendor Portal** uses the same API but only receives data for the signed-in vendor's `tenant_id`.
-- **Admin Portal** uses admin API routes for marketplace-wide demonstration data.
-- **Nordic API** contains the FastAPI routes, authorization checks, business logic and database access.
-- **SQLite** is still the current development database.
-- **CartStore** still keeps cart data in Python memory.
-
-The three frontends and Nordic API are now separate container images. Nordic API no longer serves the frontend folders itself.
-
-## Container images
-
-The current container phase has verified these images individually:
-
-- `nordicshop-api:prod`
-- `nordicshop-customer-web:prod`
-- `nordicshop-vendor-portal:prod`
-- `nordicshop-admin-portal:prod`
-- `postgres:18.6-alpine`
-- `redis:8.10.1-alpine`
-
-The custom images run as non-root users. PostgreSQL and Redis were also checked at runtime to confirm their actual server processes run as restricted users.
-
-A short record of the checks is in `docs/evidence/container-images.md`.
-
-## Repository structure
+The platform around the application includes:
 
 ```text
-application/
-  apps/
-    customer-web/
-    vendor-portal/
-    admin-portal/
-  services/
-    nordic-api/
-  database/
-  shared/
-  tests/
-infra/
-  bootstrap/
-  environments/dev/
-  modules/
+GitHub
+  |
+GitHub Actions
+  |
+Azure OIDC
+  |
+ACR
+  |
+image digest update in Git
+  |
+Argo CD
+  |
+Helm release
+  |
+AKS
+```
+
+Azure infrastructure is created separately with Terraform:
+
+```text
+Resource Group
+├── VNet and subnets
+├── AKS
+├── Azure Container Registry
+├── Key Vault
+├── Managed Identities
+├── Azure RBAC
+├── Federated Identity Credentials
+├── Log Analytics
+├── Azure Monitor Workspace
+├── Managed Grafana
+├── diagnostics
+└── budget controls
+```
+
+More detail is in [`docs/architecture/Architecture_Brief.md`](docs/architecture/Architecture_Brief.md).
+
+## Application
+
+NordicShop currently has six main workloads:
+
+- `customer-web` — product catalogue, cart and checkout
+- `vendor-portal` — tenant-scoped products, stock updates and order lines
+- `admin-portal` — marketplace-wide admin views
+- `nordic-api` — FastAPI backend
+- `postgres` — persistent application data
+- `redis` — cart and temporary shared state
+
+The three frontends are small static applications served by Nginx. They call the shared FastAPI backend through `/api/*`.
+
+The application is multi-tenant at the vendor layer. Vendor requests are scoped by tenant, and PostgreSQL Row-Level Security is also used so tenant isolation does not depend only on API filtering.
+
+## What is implemented
+
+At this point the repository contains the working platform rather than placeholders for future work.
+
+### Azure and Terraform
+
+The development environment is built from reusable Terraform modules under `infra/`.
+
+The current Terraform layer covers:
+
+- resource group
+- networking
+- AKS
+- Azure Container Registry
+- managed identities
+- Azure RBAC
+- Key Vault
+- GitHub OIDC federation
+- monitoring and diagnostics
+- budget controls
+
+Terraform state is kept outside the workload resource group in a separate Azure Storage backend.
+
+### Kubernetes and Helm
+
+The application is packaged as a Helm chart under:
+
+```text
 helm/nordicshop/
-gitops/argocd/
-monitoring/
-tests/security/
-docs/
-  adr/
-  evidence/
-  runbooks/
-.github/workflows/
 ```
 
-The root `tests/security/` directory is reserved for later platform-level security acceptance tests. The current application tests live under `application/tests/`.
+The chart manages the application Deployments and Services together with PostgreSQL, Redis, configuration, security objects and routing-related resources.
 
-The empty platform folders are deliberate placeholders for later phases. Terraform, Kubernetes, Helm, Argo CD and monitoring have not been implemented yet.
+The earlier hand-written local Kubernetes manifests are still under `kubernetes/local/`. I kept them because they show the progression from direct Kubernetes YAML to the Helm-based deployment used by the AKS environment.
 
-## Run Nordic API locally
+### CI/CD and GitOps
+
+GitHub Actions is used to build and publish the four custom application images.
+
+The image workflow:
+
+```text
+source change
+   |
+GitHub Actions
+   |
+test and build
+   |
+Azure login with OIDC
+   |
+push images to ACR
+   |
+capture immutable digests
+   |
+update Helm values
+   |
+Git change / review
+   |
+Argo CD reconciliation
+```
+
+The AKS deployment uses immutable ACR digests rather than relying only on mutable tags.
+
+Argo CD watches Git and reconciles the NordicShop Helm release. I intentionally keep image publishing and cluster reconciliation as separate responsibilities: GitHub Actions publishes artifacts, while Argo CD deploys the desired state from Git.
+
+## Identity and secrets
+
+I did not use one Azure identity for everything.
+
+The main identity boundaries are:
+
+- local Terraform identity
+- GitHub Actions managed identity
+- AKS cluster identity
+- AKS kubelet identity
+- Nordic API workload identity
+
+GitHub Actions authenticates to Azure through OIDC instead of a stored Azure client secret.
+
+The Nordic API uses AKS Workload Identity to reach Azure Key Vault:
+
+```text
+Nordic API Pod
+   |
+Kubernetes ServiceAccount
+   |
+projected service account token
+   |
+AKS OIDC issuer
+   |
+federated identity credential
+   |
+Nordic API managed identity
+   |
+Azure Key Vault
+```
+
+The kubelet identity has the ACR pull permission needed by the cluster. Application workloads do not reuse the kubelet or cluster identity for Key Vault access.
+
+## PostgreSQL tenant isolation
+
+Vendor isolation is enforced in two places.
+
+The API performs authorization and tenant checks, and PostgreSQL independently applies Row-Level Security.
+
+The API runtime connects with a restricted role:
+
+```text
+nordicshop_app
+```
+
+The role is configured without superuser or RLS bypass privileges.
+
+RLS is enabled and forced on:
+
+```text
+products
+order_lines
+```
+
+The API sets request-scoped PostgreSQL context for customer, vendor and admin access.
+
+I first tested the policy in a disposable PostgreSQL lab before applying it to the AKS environment. That lab is kept under:
+
+```text
+tests/security/postgres-rls-lab/
+```
+
+This caught a real policy issue during development: the first customer order-line policy allowed the insert path but did not provide the matching visibility needed by `INSERT ... RETURNING`. The policy was corrected in the lab before the production rollout.
+
+## Monitoring
+
+The AKS environment uses Azure Managed Prometheus and Azure Managed Grafana.
+
+The repository includes three Grafana dashboards:
+
+```text
+monitoring/grafana/dashboards/
+├── nordicshop-application.json
+├── nordicshop-namespace-health.json
+└── nordicshop-gitops-delivery.json
+```
+
+The current alert rules include:
+
+- NordicShop API unavailable
+- replica availability degraded
+- Argo CD unhealthy
+- high 5xx error rate
+
+Alerts are connected to an Azure Monitor Action Group.
+
+I also tested the alert path by creating a controlled GitOps drift condition. The Argo CD alert fired through Managed Prometheus and Azure Monitor and reached the configured email receiver.
+
+## Verification
+
+I keep the detailed evidence under `docs/evidence/`, but these are the main results that matter.
+
+| Check | Result |
+| --- | --- |
+| PostgreSQL RLS lab | 18 passed / 0 failed |
+| AKS tenant isolation | 11 passed / 0 failed |
+| Cross-vendor customer checkout | Passed |
+| PostgreSQL outage recovery | 16 passed / 0 failed |
+| Invalid API image GitOps recovery | Passed |
+| PostgreSQL PVC persistence | Passed |
+| Argo CD final state | Synced / Healthy |
+| Managed alert delivery | Passed |
+
+The final security and recovery summary is here:
+
+[`docs/evidence/security-recovery/NordicShop_Security_and_Recovery_Acceptance.md`](docs/evidence/security-recovery/NordicShop_Security_and_Recovery_Acceptance.md)
+
+## Recovery tests
+
+I wanted the project to show what happens when something actually fails, not only that the happy path works.
+
+### Invalid API image
+
+For the image recovery test I committed a deliberately invalid Nordic API image reference.
+
+The flow was:
+
+```text
+bad image in Git
+   |
+Argo CD detects the change
+   |
+AKS starts a new rollout
+   |
+image pull fails
+   |
+failure is detected
+   |
+Git revert
+   |
+Argo CD reconciles again
+   |
+original image is restored
+```
+
+The Deployment was not repaired manually with `kubectl set image`. Recovery happened through the Git desired state.
+
+### PostgreSQL outage
+
+For the database recovery test I scaled the PostgreSQL StatefulSet from `1` to `0`.
+
+During the outage:
+
+- the PostgreSQL Pod stopped
+- the PVC stayed `Bound`
+- API readiness returned `500`
+
+After restoring PostgreSQL:
+
+- `postgres-0` returned to `Ready`
+- the same PVC remained attached
+- order count stayed unchanged
+- the latest order was still present
+- API readiness returned to `200`
+- Argo CD returned to `Synced / Healthy`
+
+No PVC was deleted during the test.
+
+## Repository layout
+
+The main directories are:
+
+```text
+.
+├── .github/workflows/          GitHub Actions
+├── application/
+│   ├── apps/                   three frontend applications
+│   ├── database/               PostgreSQL security SQL
+│   ├── services/nordic-api/    FastAPI backend
+│   └── tests/                  application tests
+├── docs/
+│   ├── architecture/           architecture brief and diagrams
+│   └── evidence/               verification records
+├── gitops/                     Argo CD configuration
+├── helm/nordicshop/            Helm chart used by AKS
+├── infra/
+│   ├── bootstrap/              Terraform backend bootstrap
+│   ├── environments/dev/       development root module
+│   └── modules/                reusable Azure modules
+├── kubernetes/local/           earlier local Kubernetes manifests
+├── monitoring/                 Grafana dashboards and alert notes
+├── scripts/                    verification/helper scripts
+└── tests/
+    ├── aks/                    AKS functional and recovery tests
+    └── security/               RLS, tenant isolation and recovery tests
+```
+
+## Running the application locally
+
+The full local stack can be started with Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+Check the services:
+
+```bash
+docker compose ps
+```
+
+Useful local endpoints are:
+
+```text
+Customer Web   http://localhost:8081
+Vendor Portal  http://localhost:8082
+Admin Portal   http://localhost:8083
+Nordic API     http://localhost:8000
+API docs       http://localhost:8000/docs
+```
+
+Stop the stack with:
+
+```bash
+docker compose down
+```
+
+The PostgreSQL named volume is intentionally kept unless volumes are explicitly removed.
+
+## Running application tests
 
 From the repository root:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+
 python -m pip install -r application/services/nordic-api/requirements.txt
-python -m uvicorn --app-dir application/services/nordic-api app.main:app --reload --port 8000
-```
-
-Useful endpoints:
-
-- API root: `http://127.0.0.1:8000/`
-- Health: `http://127.0.0.1:8000/api/health`
-- Readiness: `http://127.0.0.1:8000/api/ready`
-- API documentation: `http://127.0.0.1:8000/docs`
-
-The frontends are now separate from the API. Their full local integration will be added with Docker Compose rather than being served by FastAPI.
-
-## Run tests
-
-```bash
 python -m pytest -q application/tests
 ```
 
-Current result: `7 passed`.
+## Helm checks
 
-## Current boundary
+Validate the chart:
 
-Production Dockerfiles for the four custom application images are complete and individually verified. Docker Compose, Kubernetes, Helm, Terraform, GitHub deployment workflows and Argo CD are still future phases.
+```bash
+helm lint helm/nordicshop
+```
+
+Render the development configuration:
+
+```bash
+helm template nordicshop helm/nordicshop \
+  --namespace nordicshop \
+  -f helm/nordicshop/values-dev.yaml
+```
+
+There is also a local verification script:
+
+```bash
+./scripts/verify-helm-local.sh
+```
+
+## Terraform
+
+The development environment is under:
+
+```text
+infra/environments/dev/
+```
+
+A normal validation flow is:
+
+```bash
+cd infra/environments/dev
+
+terraform fmt -recursive ../../
+terraform validate
+terraform plan
+```
+
+I do not keep `terraform.tfvars`, state files or plan files in Git.
+
+The Terraform modules are intentionally split by responsibility rather than putting all Azure resources into one large file.
+
+## AKS checks I use most often
+
+Connect to the cluster first, then:
+
+```bash
+kubectl get nodes
+kubectl get pods -n nordicshop
+kubectl get pvc -n nordicshop
+kubectl get application nordicshop -n argocd
+```
+
+For the current healthy environment I expect the Argo CD application to end at:
+
+```text
+Synced   Healthy
+```
+
+The security and recovery tests are under:
+
+```text
+tests/security/
+```
+
+For example:
+
+```bash
+./tests/security/tenant-isolation-aks.sh
+./tests/security/invalid-api-image-recovery.sh
+./tests/security/postgres-outage-recovery.sh
+```
+
+The recovery scripts intentionally make changes to the live development environment. I only run them against the dev cluster and with a clean baseline.
+
+## Design choices
+
+A few decisions in this repository are deliberate compromises because this is a single-engineer project and a learning environment.
+
+PostgreSQL and Redis are currently inside AKS. That gives me direct experience with StatefulSets, PVCs, service discovery and dependency recovery. For a commercial production system I would seriously consider Azure Database for PostgreSQL and a managed Redis service instead.
+
+The AKS environment is not designed as a fully private enterprise platform. The network layout keeps room for future private endpoints, but I did not add Private Link everywhere just to make the diagram more complicated.
+
+I also kept the application small on purpose. Splitting the backend into many microservices would add operational work without helping the main goal of this repository, which is learning and proving the platform layer.
+
+The project has changed a lot while I built it, so some older local manifests and test assets remain in the repository when they still explain the path to the current design. I remove intermediate notes and duplicate evidence when they no longer add anything useful.
+
+## Current state
+
+The main development platform is working end to end:
+
+```text
+Terraform
+   |
+Azure infrastructure
+   |
+AKS
+   |
+Helm
+   |
+Argo CD
+   |
+NordicShop workloads
+   |
+Managed Prometheus / Grafana
+```
+
+The main security and recovery checks have also been completed.
+
+There is still more I can harden later—backup strategy, stricter production networking, branch protection, additional policy controls and a fuller production-readiness review—but I prefer to keep those as explicit next steps rather than claim they are already solved.
