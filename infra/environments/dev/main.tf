@@ -235,7 +235,6 @@ module "github_actions_federation" {
   ]
 }
 
-
 module "diagnostics" {
   source = "../../modules/diagnostics"
 
