@@ -1,5 +1,5 @@
 api:
-  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-api@sha256:1b5f884a0758031574b37916294b0d40210227b662abd1f51194da25200792e6
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-api:invalid-recovery-test-20260918-205937
 
 customerWeb:
   image: acrnordicshopazaddevweu.azurecr.io/nordicshop-customer-web@sha256:4e61ba3efca046630f3b1fa1d25d795fef91e5c4a2b3469c97a4ca0befc1a031
