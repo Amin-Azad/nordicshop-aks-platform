@@ -22,3 +22,4 @@ aks_dns_service_ip = "10.30.0.10"
 budget_notification_emails = [
   "amin.micro079@gmail.com"
 ]
+alert_email_address = "your-email@example.com"

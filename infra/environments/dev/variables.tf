@@ -103,3 +103,8 @@ variable "budget_notification_emails" {
     error_message = "At least one budget notification email address must be provided."
   }
 }
+variable "alert_email_address" {
+  description = "Email address used for Azure Monitor alert notifications."
+  type        = string
+  sensitive   = true
+}

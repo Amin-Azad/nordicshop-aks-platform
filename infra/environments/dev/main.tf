@@ -111,6 +111,32 @@ module "managed_prometheus" {
   tags = local.common_tags
 }
 
+module "prometheus_alerts" {
+  source = "../../modules/prometheus-alerts"
+
+  name                = "amprg-${local.name_prefix}-${var.location_short}"
+  resource_group_name = module.resource_group.name
+  location            = var.location
+
+  monitor_workspace_id = module.managed_prometheus.monitor_workspace_id
+  cluster_name         = module.aks.aks_name
+  action_group_id      = module.monitoring_action_group.id
+
+  tags = local.common_tags
+}
+
+module "monitoring_action_group" {
+  source = "../../modules/action-group"
+
+  name                = "ag-${local.name_prefix}-${var.location_short}"
+  short_name          = "nordicshop"
+  resource_group_name = module.resource_group.name
+
+  email_address = var.alert_email_address
+
+  tags = local.common_tags
+}
+
 module "managed_grafana" {
   source = "../../modules/managed-grafana"
 
