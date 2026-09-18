@@ -1,0 +1,82 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nordicshop-database-security
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: nordicshop-database-security
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: nordic-api
+      restartPolicy: Never
+      containers:
+        - name: database-security
+          image: {{ .Values.postgres.image }}
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGPORT
+              value: "5432"
+            - name: PGDATABASE
+              value: {{ .Values.postgres.database | quote }}
+            - name: PGUSER
+              value: {{ .Values.postgres.user | quote }}
+          command:
+            - sh
+            - -ec
+            - |
+              export PGPASSWORD="$(cat /mnt/secrets-store/postgres-password)"
+              APP_PASSWORD="$(cat /mnt/secrets-store/postgres-app-password)"
+
+              echo "Waiting for PostgreSQL..."
+              until pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE"; do
+                sleep 2
+              done
+
+              echo "Creating/updating restricted runtime role..."
+              psql -v ON_ERROR_STOP=1 -v app_password="$APP_PASSWORD" <<'SQL'
+              SELECT format(
+                'CREATE ROLE nordicshop_app LOGIN PASSWORD %L',
+                :'app_password'
+              )
+              WHERE NOT EXISTS (
+                SELECT 1 FROM pg_roles WHERE rolname = 'nordicshop_app'
+              )
+              \gexec
+
+              SELECT format(
+                'ALTER ROLE nordicshop_app LOGIN PASSWORD %L',
+                :'app_password'
+              )
+              \gexec
+              SQL
+
+              psql -v ON_ERROR_STOP=1 -f /database-security/postgresql_runtime_role.sql
+              psql -v ON_ERROR_STOP=1 -f /database-security/postgresql_rls.sql
+
+              echo "Database security configuration complete."
+          volumeMounts:
+            - name: database-security-sql
+              mountPath: /database-security
+              readOnly: true
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+      volumes:
+        - name: database-security-sql
+          configMap:
+            name: nordicshop-database-security-sql
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: nordicshop-keyvault

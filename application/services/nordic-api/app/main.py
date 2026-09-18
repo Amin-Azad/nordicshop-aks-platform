@@ -8,7 +8,15 @@ from sqlalchemy.orm import Session
 
 from .auth import admin_user, vendor_user
 from .cart import cart_store
-from .database import Base, SessionLocal, engine, get_db
+from .database import (
+    Base,
+    SessionLocal,
+    engine,
+    get_db,
+    set_admin_context,
+    set_customer_context,
+    set_vendor_context,
+)
 from .metrics import metrics_middleware
 from .models import Order, OrderLine, Product, Tenant, User
 from .seed import seed_database
@@ -76,6 +84,7 @@ def ready(db: Session = Depends(get_db)):
 
 @app.get("/api/products")
 def products(category: str | None = Query(default=None), db: Session = Depends(get_db)):
+    set_customer_context(db)
     query = select(Product).join(Product.tenant).where(Product.active.is_(True), Tenant.active.is_(True))
     if category:
         query = query.where(Product.category == category)
@@ -84,6 +93,7 @@ def products(category: str | None = Query(default=None), db: Session = Depends(g
 
 @app.get("/api/products/{product_id}")
 def product(product_id: int, db: Session = Depends(get_db)):
+    set_customer_context(db)
     item = db.get(Product, product_id)
     if not item or not item.active or not item.tenant.active:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -92,6 +102,7 @@ def product(product_id: int, db: Session = Depends(get_db)):
 
 @app.get("/api/cart/{cart_id}")
 def get_cart(cart_id: str, db: Session = Depends(get_db)):
+    set_customer_context(db)
     result = []
     for product_id, quantity in cart_store.get(cart_id).items():
         item = db.get(Product, product_id)
@@ -102,6 +113,7 @@ def get_cart(cart_id: str, db: Session = Depends(get_db)):
 
 @app.post("/api/cart/items", status_code=201)
 def add_cart_item(payload: CartItemIn, db: Session = Depends(get_db)):
+    set_customer_context(db)
     item = db.get(Product, payload.product_id)
     if not item or not item.active or item.stock < payload.quantity:
         raise HTTPException(status_code=400, detail="Product is unavailable")
@@ -116,11 +128,14 @@ def remove_cart_item(cart_id: str, product_id: int):
 
 @app.post("/api/orders", status_code=201)
 def checkout(payload: CheckoutIn, db: Session = Depends(get_db)):
+    set_customer_context(db)
     cart = cart_store.get(payload.cart_id)
     if not cart:
         raise HTTPException(status_code=400, detail="Cart is empty")
     order = Order(customer_name=payload.customer_name, customer_email=payload.customer_email)
     db.add(order)
+    db.flush()
+    set_customer_context(db, order_id=order.id)
     for product_id, quantity in cart.items():
         item = db.get(Product, product_id)
         if not item or not item.active or item.stock < quantity:
@@ -128,10 +143,10 @@ def checkout(payload: CheckoutIn, db: Session = Depends(get_db)):
         item.stock -= quantity
         order.lines.append(OrderLine(tenant_id=item.tenant_id, product_id=item.id,
                                      product_name=item.name, quantity=quantity, unit_price=item.price))
+    item_count = len(order.lines)
     db.commit()
-    db.refresh(order)
     cart_store.clear(payload.cart_id)
-    return {"order_id": order.id, "status": order.status, "items": len(order.lines)}
+    return {"order_id": order.id, "status": order.status, "items": item_count}
 
 
 @app.get("/api/vendor/me")
@@ -141,6 +156,7 @@ def vendor_me(user: User = Depends(vendor_user)):
 
 @app.get("/api/vendor/products")
 def vendor_products(user: User = Depends(vendor_user), db: Session = Depends(get_db)):
+    set_vendor_context(db, user.tenant_id)
     rows = db.scalars(select(Product).where(Product.tenant_id == user.tenant_id).order_by(Product.id)).all()
     return [product_json(p) for p in rows]
 
@@ -148,16 +164,19 @@ def vendor_products(user: User = Depends(vendor_user), db: Session = Depends(get
 @app.patch("/api/vendor/products/{product_id}/stock")
 def update_stock(product_id: int, payload: StockIn, user: User = Depends(vendor_user),
                  db: Session = Depends(get_db)):
+    set_vendor_context(db, user.tenant_id)
     item = db.scalar(select(Product).where(Product.id == product_id, Product.tenant_id == user.tenant_id))
     if not item:
         raise HTTPException(status_code=404, detail="Product not found")
     item.stock = payload.stock
+    response = product_json(item)
     db.commit()
-    return product_json(item)
+    return response
 
 
 @app.get("/api/vendor/orders")
 def vendor_orders(user: User = Depends(vendor_user), db: Session = Depends(get_db)):
+    set_vendor_context(db, user.tenant_id)
     lines = db.scalars(select(OrderLine).where(OrderLine.tenant_id == user.tenant_id).order_by(OrderLine.id.desc())).all()
     return [{"order_id": x.order_id, "product": x.product_name, "quantity": x.quantity,
              "unit_price": float(x.unit_price), "status": x.order.status} for x in lines]
@@ -165,6 +184,7 @@ def vendor_orders(user: User = Depends(vendor_user), db: Session = Depends(get_d
 
 @app.get("/api/admin/summary")
 def admin_summary(_: User = Depends(admin_user), db: Session = Depends(get_db)):
+    set_admin_context(db)
     return {
         "vendors": db.scalar(select(func.count(Tenant.id))),
         "active_vendors": db.scalar(select(func.count(Tenant.id)).where(Tenant.active.is_(True))),
@@ -191,6 +211,7 @@ def toggle_vendor(tenant_id: int, _: User = Depends(admin_user), db: Session = D
 
 @app.get("/api/admin/orders")
 def admin_orders(_: User = Depends(admin_user), db: Session = Depends(get_db)):
+    set_admin_context(db)
     orders = db.scalars(select(Order).order_by(Order.id.desc())).all()
     return [{"id": o.id, "customer": o.customer_name, "status": o.status,
              "created_at": o.created_at.isoformat(), "items": len(o.lines)} for o in orders]

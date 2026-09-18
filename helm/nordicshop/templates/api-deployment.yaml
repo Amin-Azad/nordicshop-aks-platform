@@ -64,7 +64,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: nordicshop-runtime-secret
-                  key: NORDICSHOP_DATABASE_URL
+                  key: NORDICSHOP_APP_DATABASE_URL
 
             - name: NORDICSHOP_REDIS_URL
               valueFrom:
