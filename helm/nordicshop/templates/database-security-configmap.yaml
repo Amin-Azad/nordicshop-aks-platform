@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nordicshop-database-security-sql
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+data:
+  postgresql_runtime_role.sql: |-
+{{ .Files.Get "files/database/postgresql_runtime_role.sql" | nindent 4 }}
+  postgresql_rls.sql: |-
+{{ .Files.Get "files/database/postgresql_rls.sql" | nindent 4 }}
