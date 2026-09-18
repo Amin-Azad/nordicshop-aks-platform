@@ -11,4 +11,4 @@ data:
 
   cluster-metrics: |-
     pod-annotation-based-scraping: |-
-      podannotationnamespaceregex = "nordicshop"
+      podannotationnamespaceregex = "nordicshop|argocd"
