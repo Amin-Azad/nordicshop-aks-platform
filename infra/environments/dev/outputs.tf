@@ -68,6 +68,16 @@ output "nordic_api_identity_principal_id" {
   value       = module.identities.principal_id
 }
 
+output "db_admin_identity_client_id" {
+  description = "Client ID of the database administration managed identity"
+  value       = module.db_admin_identity.client_id
+}
+
+output "db_admin_identity_principal_id" {
+  description = "Principal ID of the database administration managed identity"
+  value       = module.db_admin_identity.principal_id
+}
+
 output "aks_id" {
   description = "Resource ID of the AKS cluster."
   value       = module.aks.aks_id
