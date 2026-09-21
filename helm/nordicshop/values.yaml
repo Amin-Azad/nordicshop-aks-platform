@@ -2,6 +2,7 @@ azure:
   tenantId: ""
   keyVaultName: ""
   nordicApiClientId: ""
+  dbAdminClientId: ""
 
 config:
   redisUrl: redis://redis:6379/0
