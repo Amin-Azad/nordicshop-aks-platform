@@ -1,10 +1,29 @@
 # NordicShop AKS Platform
 
-NordicShop is a small multi-tenant marketplace that I use to build and test an Azure Kubernetes platform end to end.
+NordicShop is a small multi-tenant marketplace that I built to learn and prove an Azure Kubernetes platform end to end.
 
-The application is intentionally simple. The main work in this repository is the platform around it: Terraform, AKS, Helm, GitHub Actions, Argo CD, Workload Identity, Key Vault, monitoring, tenant isolation and recovery testing.
+The application itself is intentionally simple. The main work in this repository is the platform around it: Terraform, AKS, Helm, GitHub Actions, Argo CD, Workload Identity, Key Vault, monitoring, tenant isolation, security testing and recovery.
 
-The current development environment runs on Azure AKS in West Europe. Infrastructure is managed with Terraform, application workloads are packaged with Helm, and Argo CD keeps the cluster aligned with the desired state in Git.
+The development environment is built for Azure AKS in West Europe. Azure infrastructure is managed with Terraform, application workloads are packaged with Helm, and Argo CD keeps the cluster aligned with the desired state stored in Git.
+
+## What this project demonstrates
+
+The main things I wanted to prove with NordicShop are:
+
+- Azure infrastructure managed with reusable Terraform modules
+- AKS application delivery with Helm and Argo CD
+- GitHub Actions authentication to Azure through OIDC
+- container images published to ACR and deployed by immutable digest
+- AKS Workload Identity for Nordic API access to Azure Key Vault
+- clear separation between Terraform, Helm and Argo CD ownership
+- API authorization plus PostgreSQL Row-Level Security for vendor isolation
+- negative tenant-isolation testing across vendor boundaries
+- PostgreSQL persistence and recovery with StatefulSet and PVC testing
+- Git-based recovery from an invalid application image
+- readiness, self-healing, monitoring and alert verification
+- repeatable evidence for security and recovery tests
+
+This is a portfolio and learning platform. I kept the application small so I could focus on the cloud and platform engineering around it.
 
 ## Architecture
 
@@ -85,9 +104,9 @@ The three frontends are small static applications served by Nginx. They call the
 
 The application is multi-tenant at the vendor layer. Vendor requests are scoped by tenant, and PostgreSQL Row-Level Security is also used so tenant isolation does not depend only on API filtering.
 
-## What is implemented
+## Platform implementation
 
-At this point the repository contains the working platform rather than placeholders for future work.
+The repository contains the working platform and the evidence used to verify it.
 
 ### Azure and Terraform
 
@@ -122,57 +141,35 @@ The earlier hand-written local Kubernetes manifests are still under `kubernetes/
 
 ### Cilium NetworkPolicy status
 
-NordicShop is designed to use Cilium-backed Kubernetes NetworkPolicies to restrict application traffic between workloads.
+The Helm chart contains NetworkPolicy definitions for the three frontends, Nordic API, PostgreSQL and Redis.
 
-The Helm chart already contains NetworkPolicy definitions for:
-
-- Customer, Vendor and Admin frontends
-- Nordic API
-- PostgreSQL
-- Redis
-
-The policies are currently controlled through:
+They are currently controlled through:
 
 ```yaml
 networkPolicy:
   enabled: false
 ```
 
-NetworkPolicy enforcement is intentionally disabled at the moment.
+NetworkPolicy enforcement is intentionally disabled.
 
-The planned AKS migration to Cilium could not be completed because the Azure subscription did not have enough available regional vCPU quota for the additional node capacity required during the AKS networking upgrade.
+I planned to move the AKS cluster to Cilium before enabling these policies, but the Azure subscription did not have enough regional vCPU quota for the additional node capacity required during the networking upgrade. I left the existing networking configuration unchanged instead of forcing a partial or unsafe migration.
 
-The existing AKS cluster was therefore left on its current networking configuration instead of forcing a partial or unsafe migration.
+Because that migration is not complete, NordicShop does not claim active Kubernetes NetworkPolicy enforcement.
 
-Because the Cilium migration is not complete, NordicShop does not currently claim active Kubernetes NetworkPolicy enforcement.
+Before changing `networkPolicy.enabled` to `true`, I would verify:
 
-The existing NetworkPolicy templates are retained as the intended production-style configuration and should only be enabled after the AKS networking migration has completed successfully.
+- AKS has been migrated successfully to Cilium
+- enough Azure regional vCPU quota and capacity are available for the upgrade
+- Cilium is healthy
+- Gateway-to-frontend and Gateway-to-API routing works
+- Customer, Vendor and Admin application flows still work
+- Nordic API can reach PostgreSQL and Redis
+- required database jobs can reach PostgreSQL
+- expected pod-to-pod paths are allowed
+- denied-path tests confirm unwanted traffic is blocked
+- smoke tests and tenant-isolation tests still pass
 
-Before chainging:  
-
-```yaml
-networkPolicy:
-  enabled: true
-  ```
-
-all of the following conditions must be met:
-
-AKS has been successfully migrated to Cilium.
-Sufficient Azure regional vCPU quota and capacity are available to complete the required node-pool upgrade safely.
-The Cilium networking configuration is healthy.
-Gateway-to-frontend traffic works correctly.
-Gateway-to-API routing works correctly where required.
-Customer, Vendor and Admin application flows continue to work.
-Nordic API can reach PostgreSQL.
-Nordic API can reach Redis.
-Required database security or migration jobs can reach PostgreSQL.
-Allowed pod-to-pod traffic paths are verified.
-Explicit denied-path tests confirm that unwanted traffic is blocked.
-The full NordicShop smoke tests and tenant-isolation tests pass after enforcement is enabled.
-
-Until these checks pass, networkPolicy.enabled must remain false.
-
-This is a known platform limitation caused by Azure quota constraints, not an indication that NetworkPolicy was removed from the architecture.
+Until then, `networkPolicy.enabled` stays `false`.
 
 ### CI/CD and GitOps
 
@@ -240,9 +237,7 @@ The kubelet identity has the ACR pull permission needed by the cluster. Applicat
 
 ## PostgreSQL tenant isolation
 
-Vendor isolation is enforced in two places.
-
-The API performs authorization and tenant checks, and PostgreSQL independently applies Row-Level Security.
+Tenant isolation is enforced through API ownership checks and PostgreSQL RLS, with negative tests proving cross-tenant requests are denied in the tested application paths.
 
 The API performs role, tenant and object-level authorization before database access.
 
@@ -250,13 +245,13 @@ PostgreSQL Row-Level Security provides an additional defence-in-depth layer for 
 
 The application runtime database role, `nordicshop_app`, is intentionally restricted. It is not a superuser, cannot bypass RLS and receives only the table and column privileges required by the application.
 
-RLS in this project is intended to protect against application query mistakes, such as a missing tenant filter. It is not treated as an independent authentication boundary against a compromised application process or an attacker who already possesses the runtime database credentials, because the trusted API is responsible for setting the PostgreSQL request context.
+RLS in this project is intended to protect against application query mistakes, such as a missing tenant filter. It is not treated as an independent authentication boundary against a compromised application process or an attacker who already has the runtime database credentials, because the trusted API is responsible for setting the PostgreSQL request context.
 
 Customer checkout is allowed to decrement the `stock` column for products from multiple vendors because one order may contain items from more than one vendor. The runtime role has column-level permission only for `products.stock`; it cannot use this permission to modify protected product fields such as the product name or tenant ownership.
 
 Production user authentication is intentionally outside the scope of this portfolio application. `X-Demo-User` selects seeded demonstration identities so the project can exercise vendor authorization, tenant isolation, administrator access and the surrounding AKS platform without building a production identity system.
 
-## Monitoring
+## Monitoring and alerting
 
 The AKS environment uses Azure Managed Prometheus and Azure Managed Grafana.
 
@@ -280,7 +275,7 @@ Alerts are connected to an Azure Monitor Action Group.
 
 I also tested the alert path by creating a controlled GitOps drift condition. The Argo CD alert fired through Managed Prometheus and Azure Monitor and reached the configured email receiver.
 
-## Verification
+## Security and recovery verification
 
 I keep the detailed evidence under `docs/evidence/`, but these are the main results that matter.
 
@@ -350,6 +345,17 @@ After restoring PostgreSQL:
 
 No PVC was deleted during the test.
 
+## Known limitations
+
+I keep these limitations explicit because this repository is meant to show the platform work that is actually implemented and tested.
+
+- **Demo authentication:** `X-Demo-User` uses seeded demo identities. It is not a production authentication system. A real production application would use trusted identity tokens such as OIDC/JWT from an identity provider.
+- **RLS trust boundary:** PostgreSQL RLS is defence in depth against application query mistakes. It does not protect against total compromise of the trusted API process or stolen runtime database credentials.
+- **In-cluster data services:** PostgreSQL and Redis run inside AKS so I can demonstrate StatefulSets, PVCs, service discovery and dependency recovery. For a commercial production platform I would evaluate managed PostgreSQL and managed Redis services.
+- **Public platform paths:** this development environment is not a fully private enterprise platform. Some Azure and AKS access paths remain public. A production design would evaluate private endpoints, tighter API-server access and other network controls according to the threat model.
+- **NetworkPolicy enforcement:** the policy templates exist, but enforcement is currently disabled until the planned Cilium migration can be completed safely.
+- **Production readiness:** NordicShop is a portfolio and learning platform. It demonstrates platform engineering patterns and tested failure scenarios, but it is not presented as a production-ready commercial marketplace.
+
 ## Repository layout
 
 The main directories are:
@@ -379,7 +385,7 @@ The main directories are:
     └── security/               RLS, tenant isolation and recovery tests
 ```
 
-## Running the application locally
+## Running locally
 
 The full local stack can be started with Docker Compose:
 
@@ -411,7 +417,7 @@ docker compose down
 
 The PostgreSQL named volume is intentionally kept unless volumes are explicitly removed.
 
-## Running application tests
+## Application tests
 
 From the repository root:
 
@@ -445,7 +451,7 @@ There is also a local verification script:
 ./scripts/verify-helm-local.sh
 ```
 
-## Terraform
+## Terraform checks
 
 The development environment is under:
 
@@ -467,9 +473,9 @@ I do not keep `terraform.tfvars`, state files or plan files in Git.
 
 The Terraform modules are intentionally split by responsibility rather than putting all Azure resources into one large file.
 
-## AKS checks I use most often
+## AKS checks
 
-Connect to the cluster first, then:
+When the development cluster is running, these are the checks I use most often:
 
 ```bash
 kubectl get nodes
@@ -478,7 +484,7 @@ kubectl get pvc -n nordicshop
 kubectl get application nordicshop -n argocd
 ```
 
-For the current healthy environment I expect the Argo CD application to end at:
+After a successful reconciliation I expect the NordicShop Argo CD application to end at:
 
 ```text
 Synced   Healthy
@@ -514,7 +520,7 @@ The project has changed a lot while I built it, so some older local manifests an
 
 ## Current state
 
-The main development platform is working end to end:
+The platform has been built and verified end to end through this path:
 
 ```text
 Terraform
@@ -532,6 +538,6 @@ NordicShop workloads
 Managed Prometheus / Grafana
 ```
 
-The main security and recovery checks have also been completed.
+The main security, tenant-isolation, GitOps recovery, PostgreSQL persistence and alert-delivery checks have also been completed and recorded under `docs/evidence/`.
 
 There is still more I can harden later—backup strategy, stricter production networking, branch protection, additional policy controls and a fuller production-readiness review—but I prefer to keep those as explicit next steps rather than claim they are already solved.
