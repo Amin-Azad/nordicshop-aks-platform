@@ -47,7 +47,7 @@ The lab verified customer, vendor and admin behavior, including cross-tenant upd
 
 Evidence:
 
-`docs/evidence/security-recovery/postgres-rls-lab-20260918-190501.md`
+`docs/evidence/security-recovery/postgres-rls-lab-20260921-110351.md`
 
 ---
 
@@ -72,13 +72,7 @@ Final result:
 - PASS: 11
 - FAIL: 0
 
-Evidence:
-
-`docs/evidence/security-recovery/tenant-isolation-20260918-203029.md`
-
-A second post-merge verification was also completed after the security branch was merged into `main`.
-
-Post-merge result:
+The final post-merge verification on `main` also passed:
 
 - PASS: 11
 - FAIL: 0
