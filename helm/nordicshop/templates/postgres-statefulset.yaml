@@ -19,8 +19,11 @@ spec:
     metadata:
       labels:
         app: postgres
+        azure.workload.identity/use: "true"
 
     spec:
+      serviceAccountName: nordicshop-db-admin
+
       containers:
         - name: postgres
           image: {{ .Values.postgres.image }}
@@ -38,12 +41,15 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: nordicshop-runtime-secret
+                  name: nordicshop-db-runtime-secret
                   key: POSTGRES_PASSWORD
 
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
 
           ports:
             - containerPort: 5432
@@ -62,3 +68,9 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-pvc
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: nordicshop-db-keyvault
