@@ -106,4 +106,16 @@ jobs:
       - name: Validate Terraform
         working-directory: infra/environments/dev
         run: terraform validate
-        
+
+      - name: Install Checkov
+        run: python -m pip install checkov
+
+      - name: Run Checkov
+        run: |
+          checkov \
+            -d infra \
+            --framework terraform
+
+          checkov \
+            -f /tmp/nordicshop-rendered.yaml \
+            --framework kubernetes

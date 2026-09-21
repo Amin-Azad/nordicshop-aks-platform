@@ -1,6 +1,12 @@
 name: Publish Images to ACR
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "application/**"
+      - ".github/workflows/publish-images.yml"
   workflow_dispatch:
 
 permissions:
@@ -61,6 +67,42 @@ jobs:
             -f application/apps/admin-portal/Dockerfile \
             -t "$ACR_LOGIN_SERVER/nordicshop-admin-portal:$GITHUB_SHA" \
             application
+
+      - name: Scan Nordic API image
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          image-ref: "${{ env.ACR_LOGIN_SERVER }}/nordicshop-api:${{ github.sha }}"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: "HIGH,CRITICAL"
+
+      - name: Scan customer web image
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          image-ref: "${{ env.ACR_LOGIN_SERVER }}/nordicshop-customer-web:${{ github.sha }}"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: "HIGH,CRITICAL"
+
+      - name: Scan vendor portal image
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          image-ref: "${{ env.ACR_LOGIN_SERVER }}/nordicshop-vendor-portal:${{ github.sha }}"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: "HIGH,CRITICAL"
+
+      - name: Scan admin portal image
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          image-ref: "${{ env.ACR_LOGIN_SERVER }}/nordicshop-admin-portal:${{ github.sha }}"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: "HIGH,CRITICAL"
 
       - name: Push images to ACR
         run: |
