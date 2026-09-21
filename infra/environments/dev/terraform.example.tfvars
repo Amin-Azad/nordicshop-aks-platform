@@ -20,6 +20,6 @@ aks_service_cidr   = "10.30.0.0/16"
 aks_dns_service_ip = "10.30.0.10"
 
 budget_notification_emails = [
-  "amin.micro079@gmail.com"
+  "budget-alerts@example.com"
 ]
 alert_email_address = "your-email@example.com"
