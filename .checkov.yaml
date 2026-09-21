@@ -1,0 +1,27 @@
+# Accepted Checkov findings for the NordicShop development environment.
+# These are deliberate dev/portfolio trade-offs, not silent suppressions.
+skip-check:
+  - CKV_AZURE_237 # ACR dedicated data endpoints require Premium features; not justified for this single-region dev environment.
+  - CKV_AZURE_167 # ACR retention policy is a Premium-oriented cleanup control; immutable digests are used and dev storage is small.
+  - CKV_AZURE_166 # ACR quarantine/verification is not enabled in this low-cost dev registry.
+  - CKV_AZURE_163 # Defender-backed ACR vulnerability scanning is not enabled to avoid additional dev subscription cost.
+  - CKV_AZURE_233 # ACR zone redundancy is outside the single-region development scope.
+  - CKV_AZURE_164 # Registry content trust/signing is not implemented; deployments use immutable image digests instead.
+  - CKV_AZURE_139 # ACR public network access remains enabled in dev; private registry networking is a documented future hardening step.
+  - CKV_AZURE_165 # ACR geo-replication is unnecessary for the current single-region development environment.
+  - CKV_AZURE_227 # AKS host encryption with customer-managed configuration is deferred; Azure platform encryption is accepted for dev.
+  - CKV_AZURE_6 # API-server IP allow-listing is deferred because the single operator uses changing local IP addresses during development.
+  - CKV_AZURE_117 # AKS customer-managed disk encryption sets are outside the current cost/complexity scope.
+  - CKV_AZURE_116 # Azure Policy add-on is not enabled; this portfolio focuses on CI checks and Kubernetes workload hardening.
+  - CKV_AZURE_115 # AKS is intentionally not private so it can be managed directly from the local development workstation.
+  - CKV_AZURE_170 # Paid AKS control-plane SLA is not required for this development cluster.
+  - CKV_AZURE_226 # Ephemeral OS disks are not required for the chosen dev node configuration.
+  - CKV_AZURE_141 # AKS local admin access is retained as a development recovery path; Entra-only administration is future hardening.
+  - CKV_AZURE_171 # Kubernetes upgrades are controlled manually in this learning environment rather than through an automatic channel.
+  - CKV_AZURE_168 # Current node pod density is sufficient for this small dev workload; production sizing would be reviewed separately.
+  - CKV_AZURE_232 # A separate user node pool is not justified for the current small development cluster.
+  - CKV_AZURE_7 # Kubernetes NetworkPolicy enforcement stays disabled until the documented Cilium migration can be completed safely.
+  - CKV_AZURE_109 # Key Vault firewall restrictions are deferred with the current public dev access model.
+  - CKV_AZURE_189 # Key Vault public network access remains enabled in dev; private networking is a documented limitation.
+  - CKV2_AZURE_32 # Key Vault private endpoint is reserved for future production-style hardening.
+  - CKV2_AZURE_31 # Subnet NSGs are not added to the current AKS/private-endpoint reservation layout to keep the dev network simple.
