@@ -26,7 +26,6 @@ spec:
       serviceAccountName: nordic-api
 
       securityContext:
-        runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
 
@@ -53,6 +52,7 @@ spec:
           imagePullPolicy: IfNotPresent
 
           securityContext:
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             capabilities:
               drop:
@@ -103,4 +103,3 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: nordicshop-keyvault
-              
