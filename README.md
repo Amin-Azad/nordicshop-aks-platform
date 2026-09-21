@@ -120,6 +120,60 @@ The chart manages the application Deployments and Services together with Postgre
 
 The earlier hand-written local Kubernetes manifests are still under `kubernetes/local/`. I kept them because they show the progression from direct Kubernetes YAML to the Helm-based deployment used by the AKS environment.
 
+### Cilium NetworkPolicy status
+
+NordicShop is designed to use Cilium-backed Kubernetes NetworkPolicies to restrict application traffic between workloads.
+
+The Helm chart already contains NetworkPolicy definitions for:
+
+- Customer, Vendor and Admin frontends
+- Nordic API
+- PostgreSQL
+- Redis
+
+The policies are currently controlled through:
+
+```yaml
+networkPolicy:
+  enabled: false
+```
+
+NetworkPolicy enforcement is intentionally disabled at the moment.
+
+The planned AKS migration to Cilium could not be completed because the Azure subscription did not have enough available regional vCPU quota for the additional node capacity required during the AKS networking upgrade.
+
+The existing AKS cluster was therefore left on its current networking configuration instead of forcing a partial or unsafe migration.
+
+Because the Cilium migration is not complete, NordicShop does not currently claim active Kubernetes NetworkPolicy enforcement.
+
+The existing NetworkPolicy templates are retained as the intended production-style configuration and should only be enabled after the AKS networking migration has completed successfully.
+
+Before chainging:  
+
+```yaml
+networkPolicy:
+  enabled: true
+  ```
+  
+all of the following conditions must be met:
+
+AKS has been successfully migrated to Cilium.
+Sufficient Azure regional vCPU quota and capacity are available to complete the required node-pool upgrade safely.
+The Cilium networking configuration is healthy.
+Gateway-to-frontend traffic works correctly.
+Gateway-to-API routing works correctly where required.
+Customer, Vendor and Admin application flows continue to work.
+Nordic API can reach PostgreSQL.
+Nordic API can reach Redis.
+Required database security or migration jobs can reach PostgreSQL.
+Allowed pod-to-pod traffic paths are verified.
+Explicit denied-path tests confirm that unwanted traffic is blocked.
+The full NordicShop smoke tests and tenant-isolation tests pass after enforcement is enabled.
+
+Until these checks pass, networkPolicy.enabled must remain false.
+
+This is a known platform limitation caused by Azure quota constraints, not an indication that NetworkPolicy was removed from the architecture.
+
 ### CI/CD and GitOps
 
 GitHub Actions is used to build and publish the four custom application images.
