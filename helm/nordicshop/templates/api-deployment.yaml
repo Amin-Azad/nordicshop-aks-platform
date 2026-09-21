@@ -75,7 +75,7 @@ spec:
             - name: NORDICSHOP_DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: nordicshop-runtime-secret
+                  name: nordicshop-api-runtime-secret
                   key: NORDICSHOP_APP_DATABASE_URL
 
             - name: NORDICSHOP_REDIS_URL
@@ -104,4 +104,4 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: nordicshop-keyvault
+              secretProviderClass: nordicshop-api-keyvault
