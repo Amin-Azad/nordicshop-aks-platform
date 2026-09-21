@@ -2,6 +2,7 @@ azure:
   tenantId: "ce02f814-9bb0-4eeb-a5e6-42af533c9e9f"
   keyVaultName: "kv-nordicshop-dev-weu"
   nordicApiClientId: "14d8802c-2b2f-4b6d-91cf-2709930ea2e4"
+  dbAdminClientId: "1043a326-3f6f-4fa3-aff2-feb426003dc2"
 
 api:
   image: acrnordicshopazaddevweu.azurecr.io/nordicshop-api@sha256:1b5f884a0758031574b37916294b0d40210227b662abd1f51194da25200792e6
