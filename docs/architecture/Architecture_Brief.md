@@ -28,7 +28,7 @@ Internet
    ↓
 Public IP / Azure Load Balancer
    ↓
-Ingress Controller
+AKS Gateway / HTTPRoute
    ↓
 Customer Web / Vendor Portal / Admin Portal
    ↓
@@ -78,7 +78,7 @@ Public DNS / HTTPS
    ↓
 Public IP / Azure Load Balancer
    ↓
-Ingress Controller
+AKS Gateway / HTTPRoute
    ↓
 Customer Web Service
    ↓
@@ -246,7 +246,7 @@ ACR also does not need Private Link for the first version.
 Inside AKS:
 
 ```text
-Ingress
+Gateway / HTTPRoute
 Services
 Pods
 NetworkPolicies
@@ -593,7 +593,6 @@ Key Vault RBAC
 Key Vault
 ```
 
-The next Terraform module to build is the network module.
 
 ---
 
