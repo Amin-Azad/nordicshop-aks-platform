@@ -14,7 +14,8 @@ The main things I wanted to prove with NordicShop are:
 - AKS application delivery with Helm and Argo CD
 - GitHub Actions authentication to Azure through OIDC
 - container images published to ACR and deployed by immutable digest
-- AKS Workload Identity for Nordic API access to Azure Key Vault
+- AKS Workload Identity with separate API and database-admin identities
+- per-secret Azure Key Vault RBAC for application and database responsibilities
 - clear separation between Terraform, Helm and Argo CD ownership
 - API authorization plus PostgreSQL Row-Level Security for vendor isolation
 - negative tenant-isolation testing across vendor boundaries
@@ -210,26 +211,37 @@ The main identity boundaries are:
 - AKS cluster identity
 - AKS kubelet identity
 - Nordic API workload identity
+- database administration workload identity
 
 GitHub Actions authenticates to Azure through OIDC instead of a stored Azure client secret.
 
-The Nordic API uses AKS Workload Identity to reach Azure Key Vault:
+The API and database administration paths use separate AKS Workload Identities:
 
 ```text
-Nordic API Pod
+Nordic API
    |
-Kubernetes ServiceAccount
-   |
-projected service account token
-   |
-AKS OIDC issuer
-   |
-federated identity credential
+ServiceAccount: nordic-api
    |
 Nordic API managed identity
    |
-Azure Key Vault
+Key Vault
+   |
+nordicshop-app-database-url only
+
+
+PostgreSQL / database security Job
+   |
+ServiceAccount: nordicshop-db-admin
+   |
+DB-admin managed identity
+   |
+Key Vault
+   |
+postgres-password
+postgres-app-password
 ```
+
+Key Vault access is scoped to the individual secrets required by each identity rather than granting the API access to the whole vault. The API therefore does not receive the PostgreSQL superuser password.
 
 The kubelet identity has the ACR pull permission needed by the cluster. Application workloads do not reuse the kubelet or cluster identity for Key Vault access.
 
@@ -348,7 +360,7 @@ No PVC was deleted during the test.
 I keep these limitations explicit because this repository is meant to show the platform work that is actually implemented and tested.
 
 - **Demo authentication:** `X-Demo-User` uses seeded demo identities. It is not a production authentication system. A real production application would use trusted identity tokens such as OIDC/JWT from an identity provider.
-- **RLS trust boundary:** PostgreSQL RLS is defence in depth against application query mistakes. It does not protect against total compromise of the trusted API process or stolen runtime database credentials.
+- **RLS trust boundary:** PostgreSQL RLS is defence in depth against application query mistakes. The API now receives only the restricted application database URL, not the PostgreSQL superuser secret. A fully compromised trusted API process could still act with the runtime role and set the PostgreSQL request context, so RLS is not treated as a separate authentication boundary.
 - **In-cluster data services:** PostgreSQL and Redis run inside AKS so I can demonstrate StatefulSets, PVCs, service discovery and dependency recovery. For a commercial production platform I would evaluate managed PostgreSQL and managed Redis services.
 - **Public platform paths:** this development environment is not a fully private enterprise platform. Some Azure and AKS access paths remain public. A production design would evaluate private endpoints, tighter API-server access and other network controls according to the threat model.
 - **NetworkPolicy enforcement:** the policy templates exist, but enforcement is currently disabled until the planned Cilium migration can be completed safely.
