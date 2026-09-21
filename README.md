@@ -154,7 +154,7 @@ Before chainging:
 networkPolicy:
   enabled: true
   ```
-  
+
 all of the following conditions must be met:
 
 AKS has been successfully migrated to Cilium.
@@ -244,30 +244,17 @@ Vendor isolation is enforced in two places.
 
 The API performs authorization and tenant checks, and PostgreSQL independently applies Row-Level Security.
 
-The API runtime connects with a restricted role:
+The API performs role, tenant and object-level authorization before database access.
 
-```text
-nordicshop_app
-```
+PostgreSQL Row-Level Security provides an additional defence-in-depth layer for the vendor-owned `products` and `order_lines` tables. The API sets transaction-local PostgreSQL context such as `app.access_mode`, `app.tenant_id` and `app.order_id`, and the RLS policies use that context to restrict the rows available to the current request.
 
-The role is configured without superuser or RLS bypass privileges.
+The application runtime database role, `nordicshop_app`, is intentionally restricted. It is not a superuser, cannot bypass RLS and receives only the table and column privileges required by the application.
 
-RLS is enabled and forced on:
+RLS in this project is intended to protect against application query mistakes, such as a missing tenant filter. It is not treated as an independent authentication boundary against a compromised application process or an attacker who already possesses the runtime database credentials, because the trusted API is responsible for setting the PostgreSQL request context.
 
-```text
-products
-order_lines
-```
+Customer checkout is allowed to decrement the `stock` column for products from multiple vendors because one order may contain items from more than one vendor. The runtime role has column-level permission only for `products.stock`; it cannot use this permission to modify protected product fields such as the product name or tenant ownership.
 
-The API sets request-scoped PostgreSQL context for customer, vendor and admin access.
-
-I first tested the policy in a disposable PostgreSQL lab before applying it to the AKS environment. That lab is kept under:
-
-```text
-tests/security/postgres-rls-lab/
-```
-
-This caught a real policy issue during development: the first customer order-line policy allowed the insert path but did not provide the matching visibility needed by `INSERT ... RETURNING`. The policy was corrected in the lab before the production rollout.
+Production user authentication is intentionally outside the scope of this portfolio application. `X-Demo-User` selects seeded demonstration identities so the project can exercise vendor authorization, tenant isolation, administrator access and the surrounding AKS platform without building a production identity system.
 
 ## Monitoring
 
