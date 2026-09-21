@@ -1,11 +1,11 @@
 api:
-  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-api@sha256:1b5f884a0758031574b37916294b0d40210227b662abd1f51194da25200792e6
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-api@sha256:e94ab65c1a65e15cea7f880ccf387487971558da5a2ead953b40ebc8090b19d5
 
 customerWeb:
-  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-customer-web@sha256:4e61ba3efca046630f3b1fa1d25d795fef91e5c4a2b3469c97a4ca0befc1a031
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-customer-web@sha256:e97d86c4fa7260dbf334d3443d598c4dbcced4741620ca21ce9dc403cd81d696
 
 vendorPortal:
-  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-vendor-portal@sha256:765259aad70e41799369279b7252c980f00fd214b42026d353736d590a337bc0
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-vendor-portal@sha256:05962ddac09c1c0c577fd9829576647f434d4a8adae68832c5b8ebba455e06e9
 
 adminportal:
-  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-admin-portal@sha256:ed65d1dc01d6fd983ab4eda3a2e7447ab01e00b0bbb5fc135ef0c77b0fd589d6
+  image: acrnordicshopazaddevweu.azurecr.io/nordicshop-admin-portal@sha256:a9bdc6d22c878e80ee6b625cd7b354c7dd201cbb5dd7ca85fc3c7d4518ee390f
