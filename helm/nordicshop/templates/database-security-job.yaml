@@ -15,7 +15,7 @@ spec:
         app: nordicshop-database-security
         azure.workload.identity/use: "true"
     spec:
-      serviceAccountName: nordic-api
+      serviceAccountName: nordicshop-db-admin
       restartPolicy: Never
       containers:
         - name: database-security
@@ -79,4 +79,4 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: nordicshop-keyvault
+              secretProviderClass: nordicshop-db-keyvault
