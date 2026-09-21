@@ -18,10 +18,21 @@ spec:
         app: nordicshop-customer-web
 
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: nordicshop-customer-web
           image: {{ .Values.customerWeb.image }}
           imagePullPolicy: IfNotPresent
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
           resources:
             {{ toYaml .Values.customerWeb.resources | nindent 12 }}

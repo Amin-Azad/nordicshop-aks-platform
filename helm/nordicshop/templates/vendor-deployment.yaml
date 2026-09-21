@@ -13,10 +13,19 @@ spec:
       labels:
         app: nordicshop-vendor-portal
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: nordicshop-vendor-portal
           image: {{ .Values.vendorPortal.image }}
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
           resources:
             {{ toYaml .Values.vendorPortal.resources | nindent 12 }}

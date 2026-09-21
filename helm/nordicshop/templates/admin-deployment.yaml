@@ -13,10 +13,19 @@ spec:
       labels:
         app: nordicshop-admin-portal
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: nordicshop-admin-portal
           image: {{ .Values.adminportal.image }}
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
           resources:
             {{ toYaml .Values.adminportal.resources | nindent 12 }}

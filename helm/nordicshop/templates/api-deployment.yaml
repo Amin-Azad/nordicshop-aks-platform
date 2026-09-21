@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: nordicshop-api
-      
+
   template:
     metadata:
       labels:
@@ -24,6 +24,11 @@ spec:
 
     spec:
       serviceAccountName: nordic-api
+
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
 
       initContainers:
         - name: wait-for-postgres
@@ -46,6 +51,12 @@ spec:
         - name: nordicshop-api
           image: {{ .Values.api.image }}
           imagePullPolicy: IfNotPresent
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
           resources:
             {{ toYaml .Values.api.resources | nindent 12 }}
@@ -70,6 +81,7 @@ spec:
                 configMapKeyRef:
                   name: nordicshop-config
                   key: NORDICSHOP_REDIS_URL
+
           readinessProbe:
             httpGet:
               path: /api/ready
@@ -91,3 +103,4 @@ spec:
             readOnly: true
             volumeAttributes:
               secretProviderClass: nordicshop-keyvault
+              
