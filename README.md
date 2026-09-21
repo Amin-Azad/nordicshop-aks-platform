@@ -137,8 +137,6 @@ helm/nordicshop/
 
 The chart manages the application Deployments and Services together with PostgreSQL, Redis, configuration, security objects and routing-related resources.
 
-The earlier hand-written local Kubernetes manifests are still under `kubernetes/local/`. I kept them because they show the progression from direct Kubernetes YAML to the Helm-based deployment used by the AKS environment.
-
 ### Cilium NetworkPolicy status
 
 The Helm chart contains NetworkPolicy definitions for the three frontends, Nordic API, PostgreSQL and Redis.
@@ -377,7 +375,6 @@ The main directories are:
 │   ├── bootstrap/              reserved placeholder; remote state backend was bootstrapped separately
 │   ├── environments/dev/       development root module
 │   └── modules/                reusable Azure modules
-├── kubernetes/local/           earlier local Kubernetes manifests
 ├── monitoring/                 Grafana dashboards and alert notes
 ├── scripts/                    verification/helper scripts
 └── tests/
@@ -443,12 +440,6 @@ Render the development configuration:
 helm template nordicshop helm/nordicshop \
   --namespace nordicshop \
   -f helm/nordicshop/values-dev.yaml
-```
-
-There is also a local verification script:
-
-```bash
-./scripts/verify-helm-local.sh
 ```
 
 ## Terraform checks
