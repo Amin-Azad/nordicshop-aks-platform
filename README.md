@@ -368,7 +368,7 @@ The main directories are:
 ├── gitops/                     Argo CD configuration
 ├── helm/nordicshop/            Helm chart used by AKS
 ├── infra/
-│   ├── bootstrap/              Terraform backend bootstrap
+│   ├── bootstrap/              reserved placeholder; remote state backend was bootstrapped separately
 │   ├── environments/dev/       development root module
 │   └── modules/                reusable Azure modules
 ├── kubernetes/local/           earlier local Kubernetes manifests
