@@ -49,6 +49,18 @@ module "identities" {
   tags                = local.common_tags
 }
 
+module "db_admin_identity" {
+  source = "../../modules/identities"
+
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  identity_name       = "id-nordicshop-db-admin-${var.environment}-${var.location_short}"
+
+  tags = merge(local.common_tags, {
+    purpose = "database-administration"
+  })
+}
+
 module "github_actions_identity" {
   source = "../../modules/identities"
 
@@ -200,11 +212,27 @@ module "key_vault" {
   tags                = local.common_tags
 }
 
-module "key_vault_secrets_rbac" {
+module "nordic_api_database_url_rbac" {
   source = "../../modules/rbac"
 
   principal_id         = module.identities.principal_id
-  scope                = module.key_vault.key_vault_id
+  scope                = "${module.key_vault.key_vault_id}/secrets/nordicshop-app-database-url"
+  role_definition_name = "Key Vault Secrets User"
+}
+
+module "db_admin_postgres_password_rbac" {
+  source = "../../modules/rbac"
+
+  principal_id         = module.db_admin_identity.principal_id
+  scope                = "${module.key_vault.key_vault_id}/secrets/postgres-password"
+  role_definition_name = "Key Vault Secrets User"
+}
+
+module "db_admin_app_password_rbac" {
+  source = "../../modules/rbac"
+
+  principal_id         = module.db_admin_identity.principal_id
+  scope                = "${module.key_vault.key_vault_id}/secrets/postgres-app-password"
   role_definition_name = "Key Vault Secrets User"
 }
 
@@ -215,6 +243,18 @@ module "federation" {
   managed_identity_id = module.identities.identity_id
   issuer              = module.aks.oidc_issuer_url
   subject             = "system:serviceaccount:nordicshop:nordic-api"
+  audiences = [
+    "api://AzureADTokenExchange"
+  ]
+}
+
+module "db_admin_federation" {
+  source = "../../modules/federation"
+
+  name                = "fic-nordicshop-db-admin-dev"
+  managed_identity_id = module.db_admin_identity.identity_id
+  issuer              = module.aks.oidc_issuer_url
+  subject             = "system:serviceaccount:nordicshop:nordicshop-db-admin"
   audiences = [
     "api://AzureADTokenExchange"
   ]
