@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+
+metadata:
+  name: nordicshop
+  namespace: argocd
+
+spec:
+  description: NordicShop application project
+
+  sourceRepos:
+    - https://github.com/Amin-Azad/nordicshop-aks-platform.git
+
+  destinations:
+    - namespace: nordicshop
+      server: https://kubernetes.default.svc
