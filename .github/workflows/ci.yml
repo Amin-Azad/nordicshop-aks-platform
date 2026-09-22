@@ -126,9 +126,7 @@ jobs:
       - name: Run Checkov
         run: |
           checkov \
-            $(find infra -type f -name '*.tf' \
-              ! -path 'infra/modules/prometheus-alerts/main.tf' \
-              -printf ' -f %p') \
+            $(find infra -type f -name '*.tf' -printf ' -f %p') \
             --framework terraform \
             --config-file .checkov.yaml
           
