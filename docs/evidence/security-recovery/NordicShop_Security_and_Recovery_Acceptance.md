@@ -79,11 +79,39 @@ The final post-merge verification on `main` also passed:
 
 Evidence:
 
-`docs/evidence/security-recovery/tenant-isolation-20260918-205107.md`
+- initial AKS verification: `docs/evidence/security-recovery/tenant-isolation-20260918-205107.md`
+- final post-hardening verification: `docs/evidence/security-recovery/tenant-isolation-20260922-093626.md`
 
 ---
 
-## 3. Customer Cross-Vendor Checkout
+## 3. Workload Identity and Secret Separation
+
+The final hardening pass separated the API and database-administration secret paths.
+
+The Nordic API uses:
+
+- ServiceAccount: `nordic-api`
+- managed identity: Nordic API identity
+- Key Vault access: `nordicshop-app-database-url` only
+
+PostgreSQL and the database security Job use:
+
+- ServiceAccount: `nordicshop-db-admin`
+- separate DB-admin managed identity
+- Key Vault access: `postgres-password` and `postgres-app-password`
+
+The old vault-wide `Key Vault Secrets User` assignment for the API identity was removed and replaced with per-secret RBAC.
+
+The old shared Kubernetes Secret `nordicshop-runtime-secret` was checked for references and deleted after the new split was live.
+
+Final tenant-isolation verification after this change:
+
+- PASS: 11
+- FAIL: 0
+
+---
+
+## 4. Customer Cross-Vendor Checkout
 
 The customer checkout path was tested after RLS was enabled.
 
@@ -106,7 +134,7 @@ The same order was later used during the PostgreSQL recovery test to confirm dat
 
 ---
 
-## 4. GitOps Invalid Image Recovery
+## 5. GitOps Invalid Image Recovery
 
 A controlled GitOps failure was created by changing the Nordic API image in Git to a deliberately invalid image tag.
 
@@ -137,7 +165,7 @@ Evidence:
 
 ---
 
-## 5. PostgreSQL Outage and Recovery
+## 6. PostgreSQL Outage and Recovery
 
 A controlled PostgreSQL outage was created by scaling the PostgreSQL StatefulSet from 1 replica to 0.
 
@@ -179,7 +207,7 @@ Evidence:
 
 ---
 
-## 6. Final Platform State
+## 7. Final Platform State
 
 After all security and recovery tests were completed, the final platform state was checked again.
 
@@ -191,6 +219,8 @@ Final state:
 - PostgreSQL Pod: 1/1 Running
 - PostgreSQL PVC: Bound
 - API tenant isolation: PASS
+- API / DB-admin workload identities: separated
+- old shared runtime Secret: removed
 - PostgreSQL RLS: active
 - GitOps rollback: PASS
 - PostgreSQL recovery: PASS
@@ -208,6 +238,9 @@ The platform now demonstrates:
 - API-level tenant authorization
 - PostgreSQL row-level security
 - restricted database runtime permissions
+- separate API and DB-admin workload identities
+- secret-scoped Key Vault RBAC
+- cleanup of the old shared runtime Secret
 - vendor cross-tenant protection
 - working multi-vendor customer checkout
 - GitOps-controlled rollback and recovery
