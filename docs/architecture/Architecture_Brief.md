@@ -189,29 +189,33 @@ AcrPull
 
 on the NordicShop ACR.
 
-### Nordic API Workload Identity
+### Application workload identities
 
-Used only by the Nordic API workload.
-
-The flow is:
+The Nordic API and database administration paths use separate identities.
 
 ```text
 Nordic API Pod
    ↓
-Kubernetes ServiceAccount
-   ↓
-projected token
-   ↓
-AKS OIDC issuer
-   ↓
-federated identity credential
+ServiceAccount: nordic-api
    ↓
 Nordic API managed identity
    ↓
-Azure Key Vault
+Key Vault secret: nordicshop-app-database-url
 ```
 
-The Nordic API identity should only have the Key Vault permissions it needs.
+```text
+PostgreSQL / database security Job
+   ↓
+ServiceAccount: nordicshop-db-admin
+   ↓
+DB-admin managed identity
+   ↓
+Key Vault secrets:
+postgres-password
+postgres-app-password
+```
+
+Both identities use AKS OIDC federation. Key Vault RBAC is scoped to the individual secrets each identity needs, so the API does not receive the PostgreSQL superuser password.
 
 ### Argo CD identity
 
@@ -249,10 +253,10 @@ Inside AKS:
 Gateway / HTTPRoute
 Services
 Pods
-NetworkPolicies
+NetworkPolicy templates
 ```
 
-control Kubernetes traffic.
+The current development cluster uses Gateway API for routing. NetworkPolicy templates are present in the Helm chart, but enforcement remains disabled until the planned Cilium migration is completed safely.
 
 Azure networking controls the larger cloud network path.
 
@@ -342,8 +346,8 @@ StatefulSet
 PVC
 ConfigMaps
 ServiceAccounts
-Ingress
-NetworkPolicies
+Gateway / HTTPRoute
+NetworkPolicy templates
 HPA
 probes
 resource requests and limits
@@ -515,14 +519,14 @@ missing AcrPull
 registry access issue
 ```
 
-### Ingress or API failure
+### Gateway or API failure
 
 Detected by:
 
 ```text
 HTTP errors
 readiness checks
-Ingress logs
+Gateway / HTTPRoute state
 API logs
 Azure Monitor
 ```
@@ -533,10 +537,10 @@ The goal is to identify which layer failed instead of treating every problem as 
 
 ## 11. Terraform implementation order
 
-The recommended Terraform module order is:
+The platform was built in this dependency order:
 
 ```text
-01. resource-group        COMPLETE
+01. resource-group
 02. network
 03. monitoring
 04. acr
@@ -586,9 +590,9 @@ Workload Identity
 ```
 
 ```text
-Nordic API managed identity
+Nordic API / DB-admin managed identities
    ↓
-Key Vault RBAC
+secret-scoped Key Vault RBAC
    ↓
 Key Vault
 ```
