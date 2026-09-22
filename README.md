@@ -26,6 +26,28 @@ The main things I wanted to prove with NordicShop are:
 
 This is a portfolio and learning platform. I kept the application small so I could focus on the cloud and platform engineering around it.
 
+## Screenshots
+
+A few final snapshots from the verified development environment:
+
+### Argo CD — Synced / Healthy
+
+![Argo CD Synced and Healthy](docs/screenshots/04-argocd-synced-healthy.png)
+
+### Workload identity separation
+
+![NordicShop workload identities](docs/screenshots/07-workload-identity-secret-separation.png)
+
+### Managed Grafana
+
+![NordicShop Grafana dashboard](docs/screenshots/11-grafana-dashboard.png)
+
+### Tenant isolation
+
+![Tenant isolation PASS](docs/screenshots/12-tenant-isolation-pass.png)
+
+The full screenshot set is under [`docs/screenshots/`](docs/screenshots/).
+
 ## Architecture
 
 ![NordicShop platform architecture](docs/architecture/diagrams/01-full-platform-architecture.png)
@@ -375,7 +397,6 @@ The main directories are:
 ├── .github/workflows/          GitHub Actions
 ├── application/
 │   ├── apps/                   three frontend applications
-│   ├── database/               PostgreSQL security SQL
 │   ├── services/nordic-api/    FastAPI backend
 │   └── tests/                  application tests
 ├── docs/
@@ -387,7 +408,7 @@ The main directories are:
 │   ├── bootstrap/              reserved placeholder; remote state backend was bootstrapped separately
 │   ├── environments/dev/       development root module
 │   └── modules/                reusable Azure modules
-├── monitoring/                 Grafana dashboards and alert notes
+├── monitoring/                 Grafana dashboards
 ├── scripts/                    verification/helper scripts
 └── tests/
     ├── aks/                    AKS functional and recovery tests
