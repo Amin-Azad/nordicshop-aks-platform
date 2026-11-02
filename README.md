@@ -217,7 +217,7 @@ Git change / review
    |
 Argo CD reconciliation
 ```
-
+Security scanning runs in both workflows. CI Validation (`ci.yml`) runs Checkov against the Terraform modules and the rendered Kubernetes manifests on every pull request. Publish Images (`publish-images.yml`) scans each of the four images with Trivy before it is pushed to ACR, and the workflow fails on any fixable HIGH or CRITICAL vulnerability.
 The AKS deployment uses immutable ACR digests rather than relying only on mutable tags.
 
 Argo CD watches Git and reconciles the NordicShop Helm release. I intentionally keep image publishing and cluster reconciliation as separate responsibilities: GitHub Actions publishes artifacts, while Argo CD deploys the desired state from Git.
